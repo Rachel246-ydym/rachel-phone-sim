@@ -4,7 +4,12 @@ import InputBar from './InputBar'
 import { useChatRoom } from './useChatRoom'
 import './ChatRoom.css'
 
-export default function ChatRoom({ onBack }: { onBack: () => void }) {
+interface ChatRoomProps {
+  onBack: () => void
+  onOpenStory: () => void
+}
+
+export default function ChatRoom({ onBack, onOpenStory }: ChatRoomProps) {
   const { character, messages, streamingText, error, send, sending } = useChatRoom()
 
   if (!character) {
@@ -16,7 +21,15 @@ export default function ChatRoom({ onBack }: { onBack: () => void }) {
   }
 
   return (
-    <SubPage title={character.name} onBack={onBack}>
+    <SubPage
+      title={character.name}
+      onBack={onBack}
+      action={
+        <button className="chat-room__story-btn" onClick={onOpenStory}>
+          剧情
+        </button>
+      }
+    >
       <div className="chat-room">
         <MessageList
           messages={messages}

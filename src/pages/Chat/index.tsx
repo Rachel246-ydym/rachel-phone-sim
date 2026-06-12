@@ -16,9 +16,9 @@ export default function ChatModule() {
     case 'list':
       return <ChatList onNavigate={setView} />
     case 'room':
-      return <ChatRoom onBack={() => setView('list')} />
+      return <ChatRoom onBack={() => setView('list')} onOpenStory={() => setView('story')} />
     case 'story':
-      return <StoryMode onBack={() => setView('list')} />
+      return <StoryMode onBack={() => setView('room')} />
     case 'charProfile':
       return <CharProfile onBack={() => setView('list')} />
     case 'memoryCore':

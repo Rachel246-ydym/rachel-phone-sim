@@ -42,6 +42,7 @@ export interface Message {
   role: Role
   content: string
   timestamp: number
+  storyId?: string
   storyBranchId?: string
 }
 
@@ -58,6 +59,7 @@ export interface Story {
   title: string
   activeBranchId: string
   createdAt: number
+  updatedAt: number
 }
 
 export interface StoryBranch {

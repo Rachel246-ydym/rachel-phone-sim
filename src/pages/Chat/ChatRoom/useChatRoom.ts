@@ -32,7 +32,7 @@ export function useChatRoom() {
     void getAll<Message>('messages').then((all) => {
       if (cancelled) return
       const own = all
-        .filter((m) => m.characterId === characterId)
+        .filter((m) => m.characterId === characterId && !m.storyId)
         .sort((a, b) => a.timestamp - b.timestamp)
       dispatch({ type: 'chat/setMessages', messages: own })
     })

@@ -1,0 +1,281 @@
+.story-mode__missing {
+  margin: 32px 16px;
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+/* ===== 故事列表 ===== */
+
+.story-list__add {
+  font-size: 24px;
+  line-height: 1;
+  padding: 0 8px;
+  color: var(--color-primary);
+}
+
+.story-list__empty {
+  margin-top: 80px;
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.story-list__empty-hint {
+  font-size: 13px;
+}
+
+.story-list__items {
+  list-style: none;
+  margin: 0;
+  padding: 8px 0;
+}
+
+.story-list__item {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.story-list__item:active {
+  background: var(--color-surface);
+}
+
+.story-list__name {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.story-list__meta {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+/* ===== 故事阅读/互动页 ===== */
+
+.story-reader {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.story-reader__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.story-reader__empty {
+  margin: 80px 0;
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.story-reader__user {
+  margin: 0;
+  align-self: flex-end;
+  max-width: 85%;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  border-right: 2px solid var(--color-primary);
+  padding-right: 8px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.story-reader__segment {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.story-reader__segment-meta {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-bottom: 6px;
+}
+
+.story-reader__segment-text {
+  font-size: 15px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.story-reader__error {
+  margin: 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--color-danger);
+}
+
+.story-reader__input-bar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-bg);
+}
+
+.story-reader__input {
+  flex: 1;
+  font: inherit;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  padding: 9px 14px;
+  outline: none;
+  resize: none;
+  max-height: 96px;
+  line-height: 1.4;
+}
+
+.story-reader__input:focus {
+  border-color: var(--color-primary);
+}
+
+.story-reader__send {
+  flex-shrink: 0;
+  padding: 9px 16px;
+  border-radius: 18px;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 15px;
+}
+
+.story-reader__send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.story-reader__send:not(:disabled):active {
+  background: var(--color-primary-dim);
+}
+
+/* ===== 弹层（操作菜单 / 编辑 / 确认 / 新建故事） ===== */
+
+.story-sheet__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.story-sheet {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 12px 16px;
+  padding: 12px;
+  border-radius: 16px;
+  background: var(--color-surface-raised);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.story-sheet__title {
+  margin: 4px 4px 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.story-sheet__option {
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 15px;
+  background: var(--color-surface);
+}
+
+.story-sheet__option:active {
+  background: var(--color-border);
+}
+
+.story-sheet__option--danger {
+  color: var(--color-danger);
+}
+
+.story-sheet__cancel {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 15px;
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
+}
+
+.story-sheet__row {
+  display: flex;
+  gap: 8px;
+}
+
+.story-sheet__primary {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 15px;
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.story-sheet__primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.story-sheet__danger {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 15px;
+  background: var(--color-danger);
+  color: #fff;
+}
+
+.story-sheet__editor {
+  font: inherit;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  outline: none;
+  resize: none;
+  line-height: 1.6;
+}
+
+.story-sheet__editor:focus {
+  border-color: var(--color-primary);
+}
+
+.story-sheet__input {
+  font: inherit;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  outline: none;
+}
+
+.story-sheet__input:focus {
+  border-color: var(--color-primary);
+}
+
+.story-sheet__confirm-text {
+  margin: 8px 4px;
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: center;
+}

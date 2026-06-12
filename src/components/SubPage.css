@@ -26,6 +26,12 @@
   font-weight: 600;
 }
 
+.sub-page__action {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
 .sub-page__body {
   flex: 1;
   min-height: 0;
