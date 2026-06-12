@@ -75,9 +75,9 @@ export interface Archive {
   id: string
   storyId: string
   branchId: string
+  segmentIndex: number
   name: string
   summary: string
-  snapshot: StorySegment[]
   createdAt: number
 }
 

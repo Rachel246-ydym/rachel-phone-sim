@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useAppState } from '../../../store/AppContext'
 import { createId, get, getAll, put, remove } from '../../../services/storage'
 import { chatCompletion, chatCompletionStream, type AiMessage } from '../../../services/ai'
-import type { Character, Message, Story, StoryBranch } from '../../../types'
+import type { Archive, Character, Message, Story, StoryBranch } from '../../../types'
 
 function buildStoryPrompt(character: Character): string {
   return [
@@ -227,6 +227,37 @@ export function useStoryReader(character: Character, storyId: string) {
     }
   }
 
+  // 加载存档：切到存档分支并回到存档段落，删除该分支存档点之后的内容；返回错误文案或 null
+  async function restoreArchive(archive: Archive): Promise<string | null> {
+    if (!story || busyRef.current) return '正在生成中，暂时无法加载存档'
+    if (!branches.some((b) => b.id === archive.branchId)) {
+      return '该存档所属的分支已被删除，无法加载'
+    }
+    const all = await loadBranchMessages(storyId, archive.branchId)
+    let seen = 0
+    let cut = all.length
+    for (let i = 0; i < all.length; i += 1) {
+      if (all[i].role === 'assistant') {
+        seen += 1
+        if (seen === archive.segmentIndex) {
+          cut = i + 1
+          break
+        }
+      }
+    }
+    for (const m of all.slice(cut)) {
+      await remove('messages', m.id)
+    }
+    if (story.activeBranchId !== archive.branchId) {
+      const updated: Story = { ...story, activeBranchId: archive.branchId }
+      await put('stories', updated)
+      setStory(updated)
+    }
+    setMessages(all.slice(0, cut))
+    setError(null)
+    return null
+  }
+
   return {
     story,
     branches,
@@ -243,5 +274,6 @@ export function useStoryReader(character: Character, storyId: string) {
     createBranch,
     renameBranch,
     deleteBranch,
+    restoreArchive,
   }
 }

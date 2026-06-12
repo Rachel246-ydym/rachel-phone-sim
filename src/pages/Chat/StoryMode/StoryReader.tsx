@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import SubPage from '../../../components/SubPage'
+import ArchiveList from './ArchiveList'
 import BranchBar from './BranchBar'
 import SegmentActions from './SegmentActions'
+import { useArchives } from './useArchives'
 import { useStoryReader } from './useStoryReader'
 import type { Character, Message } from '../../../types'
 
@@ -30,9 +32,15 @@ export default function StoryReader({ character, storyId, onBack }: StoryReaderP
     createBranch,
     renameBranch,
     deleteBranch,
+    restoreArchive,
   } = useStoryReader(character, storyId)
+  const { archives, archiving, createArchive, updateArchive, deleteArchive } = useArchives(
+    character,
+    storyId,
+  )
   const [input, setInput] = useState('')
   const [menuTarget, setMenuTarget] = useState<Message | null>(null)
+  const [showArchives, setShowArchives] = useState(false)
   const pressTimer = useRef<number | null>(null)
   const endRef = useRef<HTMLDivElement>(null)
 
@@ -65,20 +73,55 @@ export default function StoryReader({ character, storyId, onBack }: StoryReaderP
     }
   }
 
+  function archiveAt(segment: Message, name: string) {
+    if (!story) return
+    const index = messages.findIndex((m) => m.id === segment.id)
+    if (index < 0) return
+    const history = messages.slice(0, index + 1)
+    const segmentIndex = history.filter((m) => m.role === 'assistant').length
+    void createArchive(name, story.activeBranchId, segmentIndex, history)
+  }
+
   let segIndex = 0
   let interactions = 0
+
+  if (showArchives) {
+    return (
+      <ArchiveList
+        archives={archives}
+        branches={branches}
+        onBack={() => setShowArchives(false)}
+        onLoad={async (archive) => {
+          const err = await restoreArchive(archive)
+          if (!err) setShowArchives(false)
+          return err
+        }}
+        onUpdate={(id, name, summary) => void updateArchive(id, name, summary)}
+        onDelete={(id) => void deleteArchive(id)}
+      />
+    )
+  }
 
   return (
     <SubPage title={story?.title ?? '故事'} onBack={onBack}>
       <div className="story-reader">
-        <BranchBar
-          branches={branches}
-          activeBranchId={story?.activeBranchId ?? null}
-          disabled={busy}
-          onSwitch={(id) => void switchBranch(id)}
-          onRename={(id, name) => void renameBranch(id, name)}
-          onDelete={(id) => void deleteBranch(id)}
-        />
+        <div className="story-reader__topbar">
+          <BranchBar
+            branches={branches}
+            activeBranchId={story?.activeBranchId ?? null}
+            disabled={busy}
+            onSwitch={(id) => void switchBranch(id)}
+            onRename={(id, name) => void renameBranch(id, name)}
+            onDelete={(id) => void deleteBranch(id)}
+          />
+          <button
+            className="story-reader__archive-btn"
+            disabled={busy}
+            onClick={() => setShowArchives(true)}
+          >
+            存档
+          </button>
+        </div>
         <div className="story-reader__scroll">
           {messages.length === 0 && streamingText === null && (
             <p className="story-reader__empty">输入一段开场行为或场景，开始这个故事</p>
@@ -121,6 +164,7 @@ export default function StoryReader({ character, storyId, onBack }: StoryReaderP
               <div className="story-reader__segment-text">{streamingText || '正在生成…'}</div>
             </section>
           )}
+          {archiving && <p className="story-reader__archiving">正在生成剧情总结并创建存档…</p>}
           {error && <p className="story-reader__error">{error}</p>}
           <div ref={endRef} />
         </div>
@@ -161,6 +205,11 @@ export default function StoryReader({ character, storyId, onBack }: StoryReaderP
           onCreateBranch={(name) => {
             setMenuTarget(null)
             void createBranch(menuTarget.id, name)
+          }}
+          onArchive={(name) => {
+            const target = menuTarget
+            setMenuTarget(null)
+            archiveAt(target, name)
           }}
         />
       )}
