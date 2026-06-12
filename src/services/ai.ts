@@ -25,9 +25,12 @@ function buildRequestBody(
   params: ModelParams,
   stream: boolean,
 ): string {
+  // contextLimit 只截断对话历史，system prompt 必须始终保留
+  const system = messages.filter((m) => m.role === 'system')
+  const history = messages.filter((m) => m.role !== 'system')
   return JSON.stringify({
     model: config.model,
-    messages: messages.slice(-params.contextLimit),
+    messages: [...system, ...history.slice(-params.contextLimit)],
     temperature: params.temperature,
     top_p: params.topP,
     max_tokens: params.maxTokens,
