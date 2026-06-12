@@ -17,11 +17,20 @@ export default function ChatList({ onNavigate }: ChatListProps) {
 
   return (
     <div className="chat-list">
-      <h1 className="chat-list__title">聊天</h1>
+      <header className="chat-list__header">
+        <h1 className="chat-list__title">聊天</h1>
+        <button
+          className="chat-list__add"
+          onClick={() => onNavigate('charProfile')}
+          aria-label="角色档案"
+        >
+          ＋
+        </button>
+      </header>
       {characters.length === 0 ? (
         <div className="chat-list__empty">
           <p>还没有角色</p>
-          <p className="chat-list__empty-hint">第二阶段将支持创建角色（如：江浔）</p>
+          <p className="chat-list__empty-hint">点击右上角 ＋ 创建角色（如：江浔）</p>
         </div>
       ) : (
         <ul className="chat-list__items">
