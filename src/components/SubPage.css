@@ -1,0 +1,33 @@
+.sub-page {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.sub-page__header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.sub-page__back {
+  font-size: 28px;
+  line-height: 1;
+  padding: 0 8px;
+  color: var(--color-primary);
+}
+
+.sub-page__title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.sub-page__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}

@@ -1,0 +1,10 @@
+{
+  "name": "Rachel Phone Simulator",
+  "short_name": "Phone Sim",
+  "lang": "zh-CN",
+  "start_url": "/rachel-phone-sim/",
+  "scope": "/rachel-phone-sim/",
+  "display": "fullscreen",
+  "background_color": "#121214",
+  "theme_color": "#4CAF7D"
+}

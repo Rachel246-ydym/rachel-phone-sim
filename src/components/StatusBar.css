@@ -1,0 +1,37 @@
+.status-bar {
+  height: var(--status-bar-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  font-size: 14px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.status-bar__right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-bar__signal {
+  font-size: 8px;
+  letter-spacing: 1px;
+  color: var(--color-text);
+}
+
+.status-bar__battery {
+  width: 24px;
+  height: 12px;
+  border: 1px solid var(--color-text-secondary);
+  border-radius: 3px;
+  padding: 1px;
+  display: inline-flex;
+}
+
+.status-bar__battery-level {
+  width: 80%;
+  border-radius: 1px;
+  background: var(--color-primary);
+}
