@@ -66,7 +66,7 @@ export interface StoryBranch {
   id: string
   storyId: string
   parentBranchId: string | null
-  branchPoint: string | null
+  branchPoint: number | null
   name: string
   createdAt: number
 }

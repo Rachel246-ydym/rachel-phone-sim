@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import SubPage from '../../../components/SubPage'
+import BranchBar from './BranchBar'
 import SegmentActions from './SegmentActions'
 import { useStoryReader } from './useStoryReader'
 import type { Character, Message } from '../../../types'
@@ -15,6 +16,7 @@ const LONG_PRESS_MS = 550
 export default function StoryReader({ character, storyId, onBack }: StoryReaderProps) {
   const {
     story,
+    branches,
     messages,
     streamingText,
     regeneratingId,
@@ -24,6 +26,10 @@ export default function StoryReader({ character, storyId, onBack }: StoryReaderP
     regenerate,
     editSegment,
     deleteSegment,
+    switchBranch,
+    createBranch,
+    renameBranch,
+    deleteBranch,
   } = useStoryReader(character, storyId)
   const [input, setInput] = useState('')
   const [menuTarget, setMenuTarget] = useState<Message | null>(null)
@@ -65,6 +71,14 @@ export default function StoryReader({ character, storyId, onBack }: StoryReaderP
   return (
     <SubPage title={story?.title ?? '故事'} onBack={onBack}>
       <div className="story-reader">
+        <BranchBar
+          branches={branches}
+          activeBranchId={story?.activeBranchId ?? null}
+          disabled={busy}
+          onSwitch={(id) => void switchBranch(id)}
+          onRename={(id, name) => void renameBranch(id, name)}
+          onDelete={(id) => void deleteBranch(id)}
+        />
         <div className="story-reader__scroll">
           {messages.length === 0 && streamingText === null && (
             <p className="story-reader__empty">输入一段开场行为或场景，开始这个故事</p>
@@ -143,6 +157,10 @@ export default function StoryReader({ character, storyId, onBack }: StoryReaderP
           onDelete={() => {
             setMenuTarget(null)
             void deleteSegment(menuTarget.id)
+          }}
+          onCreateBranch={(name) => {
+            setMenuTarget(null)
+            void createBranch(menuTarget.id, name)
           }}
         />
       )}

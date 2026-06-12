@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useAppState } from '../../../store/AppContext'
 import { createId, get, getAll, put, remove } from '../../../services/storage'
 import { chatCompletion, chatCompletionStream, type AiMessage } from '../../../services/ai'
-import type { Character, Message, Story } from '../../../types'
+import type { Character, Message, Story, StoryBranch } from '../../../types'
 
 function buildStoryPrompt(character: Character): string {
   return [
@@ -16,10 +16,27 @@ function buildStoryPrompt(character: Character): string {
     .join('\n')
 }
 
+// 主线（parentBranchId 为 null）排最前，其余按创建时间排序
+function sortBranches(list: StoryBranch[]): StoryBranch[] {
+  return [...list].sort(
+    (a, b) =>
+      Number(a.parentBranchId !== null) - Number(b.parentBranchId !== null) ||
+      a.createdAt - b.createdAt,
+  )
+}
+
+async function loadBranchMessages(storyId: string, branchId: string): Promise<Message[]> {
+  const all = await getAll<Message>('messages')
+  return all
+    .filter((m) => m.storyId === storyId && m.storyBranchId === branchId)
+    .sort((a, b) => a.timestamp - b.timestamp)
+}
+
 export function useStoryReader(character: Character, storyId: string) {
   const { apiConfigs } = useAppState()
   const apiConfig = apiConfigs.find((c) => c.isPrimary) ?? apiConfigs[0] ?? null
   const [story, setStory] = useState<Story | null>(null)
+  const [branches, setBranches] = useState<StoryBranch[]>([])
   const [messages, setMessages] = useState<Message[]>([])
   const [streamingText, setStreamingText] = useState<string | null>(null)
   const [regeneratingId, setRegeneratingId] = useState<string | null>(null)
@@ -28,15 +45,19 @@ export function useStoryReader(character: Character, storyId: string) {
 
   useEffect(() => {
     let cancelled = false
-    void Promise.all([get<Story>('stories', storyId), getAll<Message>('messages')]).then(
-      ([loaded, all]) => {
-        if (cancelled) return
-        setStory(loaded ?? null)
-        setMessages(
-          all.filter((m) => m.storyId === storyId).sort((a, b) => a.timestamp - b.timestamp),
-        )
-      },
-    )
+    void (async () => {
+      const [loaded, allBranches] = await Promise.all([
+        get<Story>('stories', storyId),
+        getAll<StoryBranch>('storyBranches'),
+      ])
+      if (cancelled) return
+      setStory(loaded ?? null)
+      setBranches(sortBranches(allBranches.filter((b) => b.storyId === storyId)))
+      if (loaded) {
+        const msgs = await loadBranchMessages(storyId, loaded.activeBranchId)
+        if (!cancelled) setMessages(msgs)
+      }
+    })()
     return () => {
       cancelled = true
     }
@@ -142,8 +163,73 @@ export function useStoryReader(character: Character, storyId: string) {
     setMessages((prev) => prev.filter((m) => m.id !== segmentId))
   }
 
+  async function switchBranch(branchId: string) {
+    if (!story || busyRef.current || branchId === story.activeBranchId) return
+    const updated: Story = { ...story, activeBranchId: branchId }
+    await put('stories', updated)
+    setStory(updated)
+    setMessages(await loadBranchMessages(storyId, branchId))
+  }
+
+  // 从指定段落创建分支：复制该段及之前的所有内容，之后独立发展
+  async function createBranch(segmentId: string, name: string) {
+    const index = messages.findIndex((m) => m.id === segmentId)
+    if (!story || index < 0 || busyRef.current) return
+    const prefix = messages.slice(0, index + 1)
+    const branch: StoryBranch = {
+      id: createId(),
+      storyId,
+      parentBranchId: story.activeBranchId,
+      branchPoint: prefix.filter((m) => m.role === 'assistant').length,
+      name,
+      createdAt: Date.now(),
+    }
+    await put('storyBranches', branch)
+    const copies = prefix.map((m) => ({ ...m, id: createId(), storyBranchId: branch.id }))
+    for (const copy of copies) {
+      await put('messages', copy)
+    }
+    const updated: Story = { ...story, activeBranchId: branch.id, updatedAt: Date.now() }
+    await put('stories', updated)
+    setBranches((prev) => sortBranches([...prev, branch]))
+    setStory(updated)
+    setMessages(copies)
+  }
+
+  async function renameBranch(branchId: string, name: string) {
+    const target = branches.find((b) => b.id === branchId)
+    const trimmed = name.trim()
+    if (!target || !trimmed) return
+    const updated: StoryBranch = { ...target, name: trimmed }
+    await put('storyBranches', updated)
+    setBranches((prev) => prev.map((b) => (b.id === branchId ? updated : b)))
+  }
+
+  // 删除分支及其全部段落；主线不可删除，删除当前分支后回到主线
+  async function deleteBranch(branchId: string) {
+    const target = branches.find((b) => b.id === branchId)
+    if (!story || !target || target.parentBranchId === null || busyRef.current) return
+    const owned = await loadBranchMessages(storyId, branchId)
+    for (const m of owned) {
+      await remove('messages', m.id)
+    }
+    await remove('storyBranches', branchId)
+    const remaining = branches.filter((b) => b.id !== branchId)
+    setBranches(remaining)
+    if (story.activeBranchId === branchId) {
+      const fallback = remaining.find((b) => b.parentBranchId === null) ?? remaining[0]
+      if (fallback) {
+        const updated: Story = { ...story, activeBranchId: fallback.id }
+        await put('stories', updated)
+        setStory(updated)
+        setMessages(await loadBranchMessages(storyId, fallback.id))
+      }
+    }
+  }
+
   return {
     story,
+    branches,
     messages,
     streamingText,
     regeneratingId,
@@ -153,5 +239,9 @@ export function useStoryReader(character: Character, storyId: string) {
     regenerate,
     editSegment,
     deleteSegment,
+    switchBranch,
+    createBranch,
+    renameBranch,
+    deleteBranch,
   }
 }
