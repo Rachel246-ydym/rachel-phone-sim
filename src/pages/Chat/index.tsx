@@ -4,9 +4,8 @@ import ChatRoom from './ChatRoom'
 import StoryMode from './StoryMode'
 import CharProfile from './CharProfile'
 import MemoryCore from './MemoryCore'
-import ChatSettings from './Settings'
 
-export type ChatView = 'list' | 'room' | 'story' | 'charProfile' | 'memoryCore' | 'settings'
+export type ChatView = 'list' | 'room' | 'story' | 'charProfile' | 'memoryCore'
 
 interface ChatModuleProps {
   initialView?: ChatView
@@ -25,7 +24,6 @@ export default function ChatModule({ initialView = 'list' }: ChatModuleProps) {
           onBack={() => setView('list')}
           onOpenStory={() => setView('story')}
           onOpenMemory={() => setView('memoryCore')}
-          onOpenSettings={() => setView('settings')}
         />
       )
     case 'story':
@@ -34,7 +32,5 @@ export default function ChatModule({ initialView = 'list' }: ChatModuleProps) {
       return <CharProfile onBack={() => setView('list')} />
     case 'memoryCore':
       return <MemoryCore onBack={() => setView('room')} />
-    case 'settings':
-      return <ChatSettings onBack={() => setView('room')} />
   }
 }

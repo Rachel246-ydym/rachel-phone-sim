@@ -9,10 +9,9 @@ interface ChatRoomProps {
   onBack: () => void
   onOpenStory: () => void
   onOpenMemory: () => void
-  onOpenSettings: () => void
 }
 
-export default function ChatRoom({ onBack, onOpenStory, onOpenMemory, onOpenSettings }: ChatRoomProps) {
+export default function ChatRoom({ onBack, onOpenStory, onOpenMemory }: ChatRoomProps) {
   const { character, messages, streamingText, error, latestHeartVoice, send, sending } =
     useChatRoom()
   const [notifVisible, setNotifVisible] = useState(false)
@@ -50,9 +49,6 @@ export default function ChatRoom({ onBack, onOpenStory, onOpenMemory, onOpenSett
             </button>
             <button className="chat-room__story-btn" onClick={onOpenStory}>
               剧情
-            </button>
-            <button className="chat-room__story-btn" onClick={onOpenSettings} aria-label="设置">
-              ⚙
             </button>
           </div>
         }

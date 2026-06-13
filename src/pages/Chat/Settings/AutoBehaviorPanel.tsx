@@ -6,6 +6,7 @@ interface Props {
   settings: AutoBehaviorSettings
   branches: BranchOption[]
   onChange: (s: AutoBehaviorSettings) => void
+  showTitle?: boolean
 }
 
 const TIME_OPTIONS = Array.from({ length: 24 }, (_, h) => `${String(h).padStart(2, '0')}:00`)
@@ -50,7 +51,7 @@ function BranchSelect({
   )
 }
 
-export default function AutoBehaviorPanel({ settings, branches, onChange }: Props) {
+export default function AutoBehaviorPanel({ settings, branches, onChange, showTitle = true }: Props) {
   function patchSend(patch: Partial<typeof settings.autoSend>) {
     onChange({ ...settings, autoSend: { ...settings.autoSend, ...patch } })
   }
@@ -65,7 +66,7 @@ export default function AutoBehaviorPanel({ settings, branches, onChange }: Prop
 
   return (
     <div className="chat-settings__section">
-      <p className="chat-settings__section-title">自动行为</p>
+      {showTitle && <p className="chat-settings__section-title">自动行为</p>}
 
       {/* Auto send */}
       <div className="chat-settings__row">

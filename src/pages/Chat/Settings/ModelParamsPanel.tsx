@@ -3,6 +3,8 @@ import type { ModelParams, ReplyMode } from '../../../types'
 interface Props {
   params: ModelParams
   onChange: (p: ModelParams) => void
+  showTitle?: boolean
+  hideMemoryCount?: boolean
 }
 
 const REPLY_MODES: { value: ReplyMode; label: string }[] = [
@@ -26,7 +28,7 @@ function Toggle({ checked, onToggle }: { checked: boolean; onToggle: () => void 
   )
 }
 
-export default function ModelParamsPanel({ params, onChange }: Props) {
+export default function ModelParamsPanel({ params, onChange, showTitle = true, hideMemoryCount = false }: Props) {
   const replyMode = params.replyMode ?? 'manual'
 
   function set<K extends keyof ModelParams>(key: K, value: ModelParams[K]) {
@@ -43,7 +45,7 @@ export default function ModelParamsPanel({ params, onChange }: Props) {
 
   return (
     <div className="chat-settings__section">
-      <p className="chat-settings__section-title">模型参数</p>
+      {showTitle && <p className="chat-settings__section-title">模型参数</p>}
 
       {/* Reply mode */}
       <div className="chat-settings__row chat-settings__row--col">
@@ -157,19 +159,21 @@ export default function ModelParamsPanel({ params, onChange }: Props) {
       </div>
 
       {/* Memory count */}
-      <div className="chat-settings__row chat-settings__row--col">
-        <div className="chat-settings__label-row">
-          <span className="chat-settings__label">注入记忆条数</span>
-          <span className="chat-settings__value">{params.memoryCount ?? 20} 条</span>
+      {!hideMemoryCount && (
+        <div className="chat-settings__row chat-settings__row--col">
+          <div className="chat-settings__label-row">
+            <span className="chat-settings__label">注入记忆条数</span>
+            <span className="chat-settings__value">{params.memoryCount ?? 20} 条</span>
+          </div>
+          <input
+            type="range"
+            className="chat-settings__slider"
+            min={10} max={100} step={1}
+            value={params.memoryCount ?? 20}
+            onChange={(e) => set('memoryCount', parseInt(e.target.value))}
+          />
         </div>
-        <input
-          type="range"
-          className="chat-settings__slider"
-          min={10} max={100} step={1}
-          value={params.memoryCount ?? 20}
-          onChange={(e) => set('memoryCount', parseInt(e.target.value))}
-        />
-      </div>
+      )}
     </div>
   )
 }

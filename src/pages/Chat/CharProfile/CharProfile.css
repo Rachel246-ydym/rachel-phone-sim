@@ -168,6 +168,94 @@
   font-size: 16px;
 }
 
+/* ===== 折叠分区 ===== */
+
+.cf__section {
+  background: var(--color-surface);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.cf__section-head {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px;
+  font-size: 15px;
+  color: var(--color-text);
+  cursor: pointer;
+  user-select: none;
+}
+
+.cf__section-head::-webkit-details-marker {
+  display: none;
+}
+
+.cf__section-arrow {
+  font-size: 18px;
+  color: var(--color-text-secondary);
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+
+details[open] .cf__section-arrow {
+  transform: rotate(90deg);
+}
+
+.cf__section-body {
+  border-top: 1px solid var(--color-border);
+}
+
+/* inner rows for inline sections (memory / heart voice) */
+.cf__section-body .chat-settings__row {
+  border-top: 1px solid var(--color-border);
+  border-bottom: none;
+}
+
+.cf__section-body .chat-settings__row:first-child {
+  border-top: none;
+}
+
+.cf__sub-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--color-border);
+}
+
+.cf__view-btn {
+  display: block;
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 14px;
+  text-align: left;
+  color: var(--color-primary);
+  border-top: 1px solid var(--color-border);
+}
+
+.cf__danger-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.cf__danger-btn {
+  padding: 14px;
+  font-size: 14px;
+  text-align: left;
+  color: var(--color-text-secondary);
+  border-top: 1px solid var(--color-border);
+}
+
+.cf__danger-btn:first-child {
+  border-top: none;
+}
+
+.cf__danger-btn--red {
+  color: var(--color-danger);
+}
+
 /* ===== 心声设置区 ===== */
 
 .char-form__hv-section {

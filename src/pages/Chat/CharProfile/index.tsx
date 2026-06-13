@@ -1,34 +1,42 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import SubPage from '../../../components/SubPage'
 import { useAppDispatch, useAppState } from '../../../store/AppContext'
-import { createId, put, remove } from '../../../services/storage'
-import type { Character, ModelParams } from '../../../types'
+import { createId, getAll, put, remove } from '../../../services/storage'
+import type { Character, Message, Story, StoryBranch } from '../../../types'
 import CharacterForm, { type CharacterDraft } from './CharacterForm'
 import HeartVoiceList from './HeartVoiceList'
+import MemoryCore from '../MemoryCore'
+import type { BranchOption } from '../Settings/AutoBehaviorPanel'
 import './CharProfile.css'
 
-const DEFAULT_MODEL_PARAMS: ModelParams = {
-  minReplies: 1,
-  maxReplies: 3,
-  temperature: 0.8,
-  topP: 0.9,
-  maxTokens: 2048,
-  stream: true,
-  contextLimit: 20,
-  timeAware: true,
-  memoryCount: 20,
-  replyMode: 'manual',
-}
+type ProfileView = 'list' | 'form' | 'heartVoiceList' | 'memoryCore'
 
-type ProfileView = 'list' | 'form' | 'heartVoiceList'
+async function loadBranches(characterId: string): Promise<BranchOption[]> {
+  const [allStories, allBranches] = await Promise.all([
+    getAll<Story>('stories'),
+    getAll<StoryBranch>('storyBranches'),
+  ])
+  const myStories = allStories.filter((s) => s.characterId === characterId)
+  const storyTitles = Object.fromEntries(myStories.map((s) => [s.id, s.title]))
+  const myStoryIds = new Set(myStories.map((s) => s.id))
+  return allBranches
+    .filter((b) => myStoryIds.has(b.storyId))
+    .map((b) => ({ ...b, storyTitle: storyTitles[b.storyId] ?? '' }))
+}
 
 export default function CharProfile({ onBack }: { onBack: () => void }) {
   const { characters } = useAppState()
   const dispatch = useAppDispatch()
   const [view, setView] = useState<ProfileView>('list')
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [branches, setBranches] = useState<BranchOption[]>([])
 
   const editing = characters.find((c) => c.id === editingId) ?? null
+
+  useEffect(() => {
+    if (!editingId) { setBranches([]); return }
+    void loadBranches(editingId).then(setBranches)
+  }, [editingId])
 
   function openCreate() {
     setEditingId(null)
@@ -40,17 +48,27 @@ export default function CharProfile({ onBack }: { onBack: () => void }) {
     setView('form')
   }
 
+  function openMemory() {
+    if (!editingId) return
+    dispatch({ type: 'chat/setActiveCharacter', characterId: editingId })
+    setView('memoryCore')
+  }
+
   async function handleSave(draft: CharacterDraft) {
+    const { autoSummary, ...charFields } = draft
+    const id = editing?.id ?? createId()
     const character: Character = editing
-      ? { ...editing, ...draft }
+      ? { ...editing, ...charFields }
       : {
-          id: createId(),
-          ...draft,
+          id,
+          ...charFields,
           online: true,
-          modelParams: DEFAULT_MODEL_PARAMS,
           createdAt: Date.now(),
         }
-    await put('characters', character)
+    await Promise.all([
+      put('characters', character),
+      put('settings', { id: `memory_auto_${id}`, value: autoSummary }),
+    ])
     dispatch({ type: 'chat/upsertCharacter', character })
     setView('list')
   }
@@ -61,6 +79,19 @@ export default function CharProfile({ onBack }: { onBack: () => void }) {
     await remove('characters', editing.id)
     dispatch({ type: 'chat/removeCharacter', characterId: editing.id })
     setView('list')
+  }
+
+  async function handleClearMessages() {
+    if (!editing) return
+    if (!window.confirm(`确定清除「${editing.name}」的所有聊天记录？`)) return
+    const all = await getAll<Message>('messages')
+    const own = all.filter((m) => m.characterId === editing.id && !m.storyId)
+    await Promise.all(own.map((m) => remove('messages', m.id)))
+    dispatch({ type: 'chat/setMessages', messages: [] })
+  }
+
+  if (view === 'memoryCore') {
+    return <MemoryCore onBack={() => setView('form')} />
   }
 
   if (view === 'heartVoiceList' && editingId) {
@@ -78,9 +109,12 @@ export default function CharProfile({ onBack }: { onBack: () => void }) {
       <SubPage title={editing ? '编辑角色' : '新建角色'} onBack={() => setView('list')}>
         <CharacterForm
           initial={editing}
+          branches={branches}
           onSave={handleSave}
           onDelete={editing ? handleDelete : undefined}
+          onClearMessages={editing ? handleClearMessages : undefined}
           onViewHeartVoices={editing ? () => setView('heartVoiceList') : undefined}
+          onViewMemory={editing ? openMemory : undefined}
         />
       </SubPage>
     )
