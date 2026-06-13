@@ -3,12 +3,22 @@ import { useAppState } from '../../../store/AppContext'
 import { createId, get, getAll, put, remove } from '../../../services/storage'
 import { chatCompletion, chatCompletionStream, type AiMessage } from '../../../services/ai'
 import type { Archive, Character, Message, Story, StoryBranch } from '../../../types'
+import type { StorySettingsData } from './useStorySettings'
 
-function buildStoryPrompt(character: Character): string {
+const PERSON_LABEL: Record<StorySettingsData['narrativePerson'], string> = {
+  first: '第一人称（以"我"视角叙述）',
+  third: '第三人称（以"他/她"视角叙述）',
+  mixed: '混合视角（灵活切换叙事人称）',
+}
+
+function buildStoryPrompt(character: Character, settings: StorySettingsData): string {
   return [
     `你是一位小说叙事者，正在创作「${character.name}」与用户共同经历的线下剧情。`,
     character.nickname ? `故事中的用户即「${character.nickname}」。` : '',
     `角色设定：${character.persona}`,
+    `叙事人称：${PERSON_LABEL[settings.narrativePerson]}`,
+    `每段目标字数：约 ${settings.targetWords} 字`,
+    settings.styleGuide ? `文风要求：${settings.styleGuide}` : '',
     '用户每次输入自己的行为或对话，你据此生成下一段大段连贯的叙事文本，包含场景、动作、心理与对话描写。',
     '每次只推进一段剧情，在适合用户介入的节点收尾，不要替用户做决定或代写用户的台词。',
   ]
@@ -32,7 +42,7 @@ async function loadBranchMessages(storyId: string, branchId: string): Promise<Me
     .sort((a, b) => a.timestamp - b.timestamp)
 }
 
-export function useStoryReader(character: Character, storyId: string) {
+export function useStoryReader(character: Character, storyId: string, settings: StorySettingsData) {
   const { apiConfigs } = useAppState()
   const apiConfig = apiConfigs.find((c) => c.isPrimary) ?? apiConfigs[0] ?? null
   const [story, setStory] = useState<Story | null>(null)
@@ -68,7 +78,7 @@ export function useStoryReader(character: Character, storyId: string) {
       throw new Error('请先在「我的」→ API 设置中添加 API 配置')
     }
     const aiMessages: AiMessage[] = [
-      { role: 'system', content: buildStoryPrompt(character) },
+      { role: 'system', content: buildStoryPrompt(character, settings) },
       ...history.map((m) => ({ role: m.role, content: m.content })),
     ]
     const params = character.modelParams

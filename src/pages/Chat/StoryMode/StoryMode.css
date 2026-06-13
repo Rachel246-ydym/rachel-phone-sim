@@ -81,6 +81,17 @@
   opacity: 0.5;
 }
 
+.story-reader__settings-btn {
+  flex-shrink: 0;
+  padding: 8px 12px;
+  font-size: 17px;
+  color: var(--color-text-secondary);
+}
+
+.story-reader__settings-btn:active {
+  color: var(--color-primary);
+}
+
 .branch-bar {
   position: relative;
   flex: 1;
@@ -470,4 +481,194 @@
   font-size: 13px;
   text-align: center;
   color: var(--color-danger);
+}
+
+/* ===== 剧情设定页 ===== */
+
+.story-settings {
+  padding: 8px 0 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.story-settings__section {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.story-settings__section-title {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.story-settings__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.story-settings__label {
+  font-size: 15px;
+  font-weight: 400;
+  margin: 0;
+  color: var(--color-text);
+}
+
+/* Theme chips */
+
+.story-settings__theme-row {
+  display: flex;
+  gap: 10px;
+}
+
+.story-settings__theme-chip {
+  flex: 1;
+  padding: 10px 4px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 2px solid transparent;
+  transition: border-color 0.15s;
+}
+
+.story-settings__theme-chip--active {
+  border-color: var(--color-primary);
+}
+
+/* Narrative person / generic chips */
+
+.story-settings__chip-row {
+  display: flex;
+  gap: 8px;
+}
+
+.story-settings__chip {
+  flex: 1;
+  padding: 9px 4px;
+  border-radius: 10px;
+  font-size: 13px;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  border: 2px solid transparent;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.story-settings__chip--active {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* Toggle switch */
+
+.story-settings__toggle {
+  position: relative;
+  width: 48px;
+  height: 28px;
+  border-radius: 14px;
+  background: var(--color-border);
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.story-settings__toggle--on {
+  background: var(--color-primary);
+}
+
+.story-settings__toggle-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+}
+
+.story-settings__toggle--on .story-settings__toggle-knob {
+  transform: translateX(20px);
+}
+
+/* Textarea */
+
+.story-settings__textarea {
+  width: 100%;
+  font: inherit;
+  font-size: 14px;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  outline: none;
+  resize: vertical;
+  line-height: 1.6;
+  min-height: 80px;
+}
+
+.story-settings__textarea:focus {
+  border-color: var(--color-primary);
+}
+
+/* Number input */
+
+.story-settings__number {
+  width: 80px;
+  font: inherit;
+  font-size: 15px;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  outline: none;
+  text-align: right;
+}
+
+.story-settings__number:focus {
+  border-color: var(--color-primary);
+}
+
+/* Footer save button */
+
+.story-settings__footer {
+  padding: 20px 16px 0;
+}
+
+.story-settings__save {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.story-settings__save:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Toast */
+
+.story-settings__toast {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 24px;
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  font-size: 14px;
+  pointer-events: none;
+  z-index: 100;
+  white-space: nowrap;
 }

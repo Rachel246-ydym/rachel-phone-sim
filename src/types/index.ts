@@ -4,6 +4,8 @@ export type Role = 'user' | 'assistant' | 'system'
 
 export type NarrativePerson = 'first' | 'third' | 'mixed'
 
+export type StoryTheme = 'dark' | 'light' | 'cream' | 'navy'
+
 export type ReplyMode = 'manual' | 'auto-interruptible' | 'auto-uninterruptible'
 
 export type MemoryTag =

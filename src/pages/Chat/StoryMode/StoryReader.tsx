@@ -3,8 +3,10 @@ import SubPage from '../../../components/SubPage'
 import ArchiveList from './ArchiveList'
 import BranchBar from './BranchBar'
 import SegmentActions from './SegmentActions'
+import StorySettings from './StorySettings'
 import { useArchives } from './useArchives'
 import { useStoryReader } from './useStoryReader'
+import { useStorySettings, THEME_VARS } from './useStorySettings'
 import type { Character, Message } from '../../../types'
 
 interface StoryReaderProps {
@@ -16,6 +18,7 @@ interface StoryReaderProps {
 const LONG_PRESS_MS = 550
 
 export default function StoryReader({ character, storyId, onBack }: StoryReaderProps) {
+  const { settings, saveSettings } = useStorySettings()
   const {
     story,
     branches,
@@ -33,7 +36,7 @@ export default function StoryReader({ character, storyId, onBack }: StoryReaderP
     renameBranch,
     deleteBranch,
     restoreArchive,
-  } = useStoryReader(character, storyId)
+  } = useStoryReader(character, storyId, settings)
   const { archives, archiving, createArchive, updateArchive, deleteArchive } = useArchives(
     character,
     storyId,
@@ -41,6 +44,7 @@ export default function StoryReader({ character, storyId, onBack }: StoryReaderP
   const [input, setInput] = useState('')
   const [menuTarget, setMenuTarget] = useState<Message | null>(null)
   const [showArchives, setShowArchives] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
   const pressTimer = useRef<number | null>(null)
   const endRef = useRef<HTMLDivElement>(null)
 
@@ -82,8 +86,17 @@ export default function StoryReader({ character, storyId, onBack }: StoryReaderP
     void createArchive(name, story.activeBranchId, segmentIndex, history)
   }
 
-  let segIndex = 0
-  let interactions = 0
+  if (showSettings) {
+    return (
+      <StorySettings
+        initial={settings}
+        onBack={() => setShowSettings(false)}
+        onSave={async (data) => {
+          await saveSettings(data)
+        }}
+      />
+    )
+  }
 
   if (showArchives) {
     return (
@@ -102,9 +115,12 @@ export default function StoryReader({ character, storyId, onBack }: StoryReaderP
     )
   }
 
+  let segIndex = 0
+  let interactions = 0
+
   return (
     <SubPage title={story?.title ?? '故事'} onBack={onBack}>
-      <div className="story-reader">
+      <div className="story-reader" style={THEME_VARS[settings.theme] as React.CSSProperties}>
         <div className="story-reader__topbar">
           <BranchBar
             branches={branches}
@@ -120,6 +136,13 @@ export default function StoryReader({ character, storyId, onBack }: StoryReaderP
             onClick={() => setShowArchives(true)}
           >
             存档
+          </button>
+          <button
+            className="story-reader__settings-btn"
+            onClick={() => setShowSettings(true)}
+            aria-label="剧情设定"
+          >
+            ⚙
           </button>
         </div>
         <div className="story-reader__scroll">
