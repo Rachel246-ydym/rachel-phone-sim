@@ -15,7 +15,7 @@ import type {
 } from '../types'
 import type { ChatAction } from './actions/chat'
 import type { ProfileAction } from './actions/profile'
-import { getAll } from '../services/storage'
+import { get, getAll } from '../services/storage'
 
 export type AppAction = ChatAction | ProfileAction
 
@@ -26,6 +26,7 @@ export interface AppState {
   apiConfigs: ApiConfig[]
   userProfile: UserProfile | null
   displaySettings: DisplaySettings
+  featureApiAssignment: Record<string, string>
 }
 
 const initialState: AppState = {
@@ -35,6 +36,7 @@ const initialState: AppState = {
   apiConfigs: [],
   userProfile: null,
   displaySettings: { fullscreen: false, homePageMode: 'slide' },
+  featureApiAssignment: {},
 }
 
 function reducer(state: AppState, action: AppAction): AppState {
@@ -80,6 +82,8 @@ function reducer(state: AppState, action: AppAction): AppState {
       return { ...state, userProfile: action.profile }
     case 'profile/setDisplaySettings':
       return { ...state, displaySettings: action.settings }
+    case 'profile/setFeatureApiAssignment':
+      return { ...state, featureApiAssignment: action.assignment }
   }
 }
 
@@ -92,10 +96,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false
     async function hydrate() {
-      const [characters, apiConfigs, profiles] = await Promise.all([
+      const [characters, apiConfigs, profiles, displayEntry, assignEntry] = await Promise.all([
         getAll<Character>('characters'),
         getAll<ApiConfig>('apiConfigs'),
         getAll<UserProfile>('userProfile'),
+        get<{ id: string; value: DisplaySettings }>('settings', 'displaySettings'),
+        get<{ id: string; value: Record<string, string> }>('settings', 'featureApiAssignment'),
       ])
       if (cancelled) return
       dispatch({ type: 'chat/setCharacters', characters })
@@ -103,6 +109,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const profile = profiles[0]
       if (profile) {
         dispatch({ type: 'profile/setUserProfile', profile })
+      }
+      if (displayEntry?.value) {
+        dispatch({ type: 'profile/setDisplaySettings', settings: displayEntry.value })
+      }
+      if (assignEntry?.value) {
+        dispatch({ type: 'profile/setFeatureApiAssignment', assignment: assignEntry.value })
       }
     }
     void hydrate()

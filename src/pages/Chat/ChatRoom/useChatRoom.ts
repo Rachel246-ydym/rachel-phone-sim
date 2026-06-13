@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useAppDispatch, useAppState } from '../../../store/AppContext'
 import { createId, get, getAll, put } from '../../../services/storage'
-import { chatCompletion, chatCompletionStream, type AiMessage } from '../../../services/ai'
+import { chatCompletion, chatCompletionStream, getConfigForFeature, type AiMessage } from '../../../services/ai'
 import { addMemory, buildMemoryContext } from '../../../services/memory'
 import type { ApiConfig, Character, Message } from '../../../types'
 
@@ -102,7 +102,7 @@ async function runHeartVoice(
 }
 
 export function useChatRoom() {
-  const { characters, activeCharacterId, messages, apiConfigs } = useAppState()
+  const { characters, activeCharacterId, messages, apiConfigs, featureApiAssignment } = useAppState()
   const dispatch = useAppDispatch()
   const [streamingText, setStreamingText] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -197,10 +197,12 @@ export function useChatRoom() {
         }
       }
 
-      // fire-and-forget: auto-summary + heart voice
-      void runAutoSummary(character, historyMessages, apiConfig)
+      const summaryConfig = getConfigForFeature(apiConfigs, featureApiAssignment, 'auto_summary') ?? apiConfig
+      const hvConfig = getConfigForFeature(apiConfigs, featureApiAssignment, 'heart_voice') ?? apiConfig
+
+      void runAutoSummary(character, historyMessages, summaryConfig)
       if (character.heartVoiceEnabled) {
-        void runHeartVoice(character, content, lastReply, apiConfig, setLatestHeartVoice)
+        void runHeartVoice(character, content, lastReply, hvConfig, setLatestHeartVoice)
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'AI 回复失败，请稍后重试')

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useAppState } from '../store/AppContext'
-import { chatCompletion, type AiMessage } from '../services/ai'
+import { chatCompletion, getConfigForFeature, type AiMessage } from '../services/ai'
 import { createId, getAll, put } from '../services/storage'
 import type { ApiConfig, Character, Message } from '../types'
 
@@ -114,9 +114,13 @@ async function triggerAutoMoments(
 }
 
 export function useAutoScheduler() {
-  const { characters, activeCharacterId, apiConfigs } = useAppState()
+  const { characters, activeCharacterId, apiConfigs, featureApiAssignment } = useAppState()
   const character = characters.find((c) => c.id === activeCharacterId) ?? null
-  const apiConfig = apiConfigs.find((c) => c.isPrimary) ?? apiConfigs[0] ?? null
+  const primaryConfig = apiConfigs.find((c) => c.isPrimary) ?? apiConfigs[0] ?? null
+
+  const autoSendConfig = getConfigForFeature(apiConfigs, featureApiAssignment, 'auto_send') ?? primaryConfig
+  const autoDiaryConfig = getConfigForFeature(apiConfigs, featureApiAssignment, 'auto_diary') ?? primaryConfig
+  const autoMomentsConfig = getConfigForFeature(apiConfigs, featureApiAssignment, 'auto_moments') ?? primaryConfig
 
   const autoSendRef = useRef<number | null>(null)
   const dailyRef = useRef<number | null>(null)
@@ -129,14 +133,14 @@ export function useAutoScheduler() {
     autoSendRef.current = null
     dailyRef.current = null
 
-    if (!character || !apiConfig) return
+    if (!character || !primaryConfig) return
     const auto = character.autoBehavior
     if (!auto) return
 
-    if (auto.autoSend.enabled && auto.autoSend.intervalMinutes >= 60) {
+    if (auto.autoSend.enabled && auto.autoSend.intervalMinutes >= 60 && autoSendConfig) {
       const ms = auto.autoSend.intervalMinutes * 60 * 1000
       autoSendRef.current = window.setInterval(() => {
-        void triggerAutoSend(character, apiConfig).catch(() => undefined)
+        void triggerAutoSend(character, autoSendConfig).catch(() => undefined)
       }, ms)
     }
 
@@ -149,19 +153,21 @@ export function useAutoScheduler() {
 
         if (
           auto.autoDiary.enabled &&
+          autoDiaryConfig &&
           auto.autoDiary.time === hhmm &&
           lastDiaryDateRef.current !== today
         ) {
           lastDiaryDateRef.current = today
-          void triggerAutoDiary(character, apiConfig, auto.autoDiary.branchId).catch(() => undefined)
+          void triggerAutoDiary(character, autoDiaryConfig, auto.autoDiary.branchId).catch(() => undefined)
         }
         if (
           auto.autoMoments.enabled &&
+          autoMomentsConfig &&
           auto.autoMoments.time === hhmm &&
           lastMomentsDateRef.current !== today
         ) {
           lastMomentsDateRef.current = today
-          void triggerAutoMoments(character, apiConfig, auto.autoMoments.branchId).catch(
+          void triggerAutoMoments(character, autoMomentsConfig, auto.autoMoments.branchId).catch(
             () => undefined,
           )
         }
@@ -172,5 +178,5 @@ export function useAutoScheduler() {
       if (autoSendRef.current !== null) window.clearInterval(autoSendRef.current)
       if (dailyRef.current !== null) window.clearInterval(dailyRef.current)
     }
-  }, [character, apiConfig])
+  }, [character, primaryConfig, autoSendConfig, autoDiaryConfig, autoMomentsConfig])
 }

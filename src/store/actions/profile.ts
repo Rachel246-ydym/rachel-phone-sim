@@ -6,3 +6,4 @@ export type ProfileAction =
   | { type: 'profile/removeApiConfig'; configId: string }
   | { type: 'profile/setUserProfile'; profile: UserProfile }
   | { type: 'profile/setDisplaySettings'; settings: DisplaySettings }
+  | { type: 'profile/setFeatureApiAssignment'; assignment: Record<string, string> }

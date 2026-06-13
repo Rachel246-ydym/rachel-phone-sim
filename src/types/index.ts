@@ -122,11 +122,27 @@ export interface HeartVoice {
   createdAt: number
 }
 
+export type LowPriorityFeature =
+  | 'heart_voice'
+  | 'auto_summary'
+  | 'auto_send'
+  | 'auto_diary'
+  | 'auto_moments'
+
+export interface ApiUsageLog {
+  id: string
+  configId: string
+  timestamp: number
+  tokens: number
+  success: boolean
+}
+
 export interface ApiUsageStats {
   todayRequests: number
   todayTokens: number
   todayFailures: number
   recordLimit: number
+  statsDate?: string
 }
 
 export interface ApiConfig {
