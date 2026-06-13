@@ -55,3 +55,13 @@ export async function clearMemories(characterId: string, tag?: MemoryTag): Promi
   await Promise.all(targets.map((m) => remove('memories', m.id)))
   return targets.length
 }
+
+export async function buildMemoryContext(characterId: string, count: number): Promise<string> {
+  const memories = await listMemories(characterId)
+  const recent = memories.slice(0, count)
+  if (recent.length === 0) return ''
+  return (
+    '\n\n核心记忆（角色对用户的了解与重要经历）：\n' +
+    recent.map((m, i) => `${i + 1}. ${m.content}`).join('\n')
+  )
+}

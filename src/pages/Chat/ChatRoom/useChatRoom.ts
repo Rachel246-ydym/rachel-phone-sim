@@ -1,18 +1,69 @@
 import { useEffect, useRef, useState } from 'react'
 import { useAppDispatch, useAppState } from '../../../store/AppContext'
-import { createId, getAll, put } from '../../../services/storage'
+import { createId, get, getAll, put } from '../../../services/storage'
 import { chatCompletion, chatCompletionStream, type AiMessage } from '../../../services/ai'
-import type { Character, Message } from '../../../types'
+import { addMemory, buildMemoryContext } from '../../../services/memory'
+import type { ApiConfig, Character, Message } from '../../../types'
 
-function buildSystemPrompt(character: Character): string {
-  return [
-    `你正在扮演「${character.name}」，通过手机和用户聊天。`,
-    character.nickname ? `你称呼用户为「${character.nickname}」。` : '',
-    '动作描写用 * 包裹（如 *他低头笑了笑*），区别于对话文本。',
-    character.persona,
+function buildSystemPrompt(character: Character, memoryContext: string): string {
+  return (
+    [
+      `你正在扮演「${character.name}」，通过手机和用户聊天。`,
+      character.nickname ? `你称呼用户为「${character.nickname}」。` : '',
+      '动作描写用 * 包裹（如 *他低头笑了笑*），区别于对话文本。',
+      character.persona,
+    ]
+      .filter(Boolean)
+      .join('\n') + memoryContext
+  )
+}
+
+async function runAutoSummary(
+  character: Character,
+  allMessages: Message[],
+  apiConfig: ApiConfig,
+): Promise<void> {
+  const key = `memory_auto_${character.id}`
+  const entry = await get<{ id: string; value: { enabled: boolean; every: number } }>(
+    'settings',
+    key,
+  )
+  const auto = entry?.value ?? { enabled: false, every: 20 }
+  if (!auto.enabled || auto.every <= 0) return
+
+  const assistantCount = allMessages.filter((m) => m.role === 'assistant').length
+  if (assistantCount === 0 || assistantCount % auto.every !== 0) return
+
+  const recent = allMessages.slice(-auto.every * 2)
+  const summaryMessages: AiMessage[] = [
+    {
+      role: 'system',
+      content:
+        '你是记忆整理助手。请将以下对话内容整理为一条简洁的核心记忆（3-5句话），客观描述发生了什么，不含主观评价。',
+    },
+    {
+      role: 'user',
+      content:
+        `对话内容：\n` +
+        recent
+          .map((m) => `${m.role === 'user' ? '用户' : character.name}：${m.content}`)
+          .join('\n\n') +
+        '\n\n请生成核心记忆：',
+    },
   ]
-    .filter(Boolean)
-    .join('\n')
+  const summary = await chatCompletion(apiConfig, summaryMessages, {
+    ...character.modelParams,
+    maxTokens: 300,
+    stream: false,
+  })
+  if (summary.trim()) {
+    await addMemory(
+      character.id,
+      summary.trim(),
+      'auto-summary',
+      `自动总结（第${assistantCount}轮对话）`,
+    )
+  }
 }
 
 export function useChatRoom() {
@@ -61,8 +112,11 @@ export function useChatRoom() {
     await put('messages', userMessage)
     dispatch({ type: 'chat/appendMessage', message: userMessage })
 
+    const memCount = character.modelParams.memoryCount ?? 20
+    const memoryContext = await buildMemoryContext(character.id, memCount)
+
     const aiMessages: AiMessage[] = [
-      { role: 'system', content: buildSystemPrompt(character) },
+      { role: 'system', content: buildSystemPrompt(character, memoryContext) },
       ...[...messages, userMessage].map((m) => ({ role: m.role, content: m.content })),
     ]
 
@@ -83,6 +137,10 @@ export function useChatRoom() {
       }
       await put('messages', assistantMessage)
       dispatch({ type: 'chat/appendMessage', message: assistantMessage })
+
+      // fire-and-forget auto-summary
+      const allChatMessages = [...messages, userMessage, assistantMessage]
+      void runAutoSummary(character, allChatMessages, apiConfig)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'AI 回复失败，请稍后重试')
     } finally {

@@ -25,6 +25,7 @@ export interface ModelParams {
   stream: boolean
   contextLimit: number
   timeAware: boolean
+  memoryCount?: number
 }
 
 export interface Character {

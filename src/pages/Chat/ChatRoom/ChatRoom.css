@@ -4,6 +4,11 @@
   flex-direction: column;
 }
 
+.chat-room__header-btns {
+  display: flex;
+  gap: 8px;
+}
+
 .chat-room__story-btn {
   font-size: 13px;
   color: var(--color-primary);

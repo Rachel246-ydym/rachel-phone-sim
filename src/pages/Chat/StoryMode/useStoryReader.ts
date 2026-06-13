@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useAppState } from '../../../store/AppContext'
 import { createId, get, getAll, put, remove } from '../../../services/storage'
 import { chatCompletion, chatCompletionStream, type AiMessage } from '../../../services/ai'
+import { buildMemoryContext } from '../../../services/memory'
 import type { Archive, Character, Message, Story, StoryBranch } from '../../../types'
 import type { StorySettingsData } from './useStorySettings'
 
@@ -77,8 +78,13 @@ export function useStoryReader(character: Character, storyId: string, settings: 
     if (!apiConfig) {
       throw new Error('请先在「我的」→ API 设置中添加 API 配置')
     }
+    let systemContent = buildStoryPrompt(character, settings)
+    if (settings.useCharMemory) {
+      const memCount = character.modelParams.memoryCount ?? 20
+      systemContent += await buildMemoryContext(character.id, memCount)
+    }
     const aiMessages: AiMessage[] = [
-      { role: 'system', content: buildStoryPrompt(character, settings) },
+      { role: 'system', content: systemContent },
       ...history.map((m) => ({ role: m.role, content: m.content })),
     ]
     const params = character.modelParams

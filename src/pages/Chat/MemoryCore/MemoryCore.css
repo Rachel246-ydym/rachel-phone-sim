@@ -1,0 +1,320 @@
+.memory-core {
+  display: flex;
+  flex-direction: column;
+}
+
+.memory-core__missing {
+  margin: 32px 16px;
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+/* ===== 自动总结设置 ===== */
+
+.memory-core__auto-section {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.memory-core__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.memory-core__row--sub {
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.memory-core__auto-label {
+  font-size: 15px;
+  color: var(--color-text);
+}
+
+.memory-core__toggle {
+  position: relative;
+  width: 48px;
+  height: 28px;
+  border-radius: 14px;
+  background: var(--color-border);
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.memory-core__toggle--on {
+  background: var(--color-primary);
+}
+
+.memory-core__toggle-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+}
+
+.memory-core__toggle--on .memory-core__toggle-knob {
+  transform: translateX(20px);
+}
+
+.memory-core__number {
+  width: 64px;
+  font: inherit;
+  font-size: 15px;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 4px 8px;
+  outline: none;
+  text-align: center;
+}
+
+.memory-core__number:focus {
+  border-color: var(--color-primary);
+}
+
+/* ===== 标签筛选 ===== */
+
+.memory-core__filter-bar {
+  display: flex;
+  gap: 8px;
+  padding: 10px 16px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--color-border);
+  scrollbar-width: none;
+}
+
+.memory-core__filter-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.memory-core__filter-chip {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border-radius: 16px;
+  font-size: 13px;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+}
+
+.memory-core__filter-chip--active {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+/* ===== 手动添加 ===== */
+
+.memory-core__add-bar {
+  display: flex;
+  gap: 8px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--color-border);
+  align-items: flex-end;
+}
+
+.memory-core__add-input {
+  flex: 1;
+  font: inherit;
+  font-size: 14px;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 8px 12px;
+  outline: none;
+  resize: none;
+  line-height: 1.5;
+}
+
+.memory-core__add-input:focus {
+  border-color: var(--color-primary);
+}
+
+.memory-core__add-btn {
+  padding: 8px 16px;
+  border-radius: 10px;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.memory-core__add-btn:disabled {
+  opacity: 0.5;
+}
+
+/* ===== 清理 ===== */
+
+.memory-core__clear-bar {
+  display: flex;
+  gap: 8px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.memory-core__clear-btn {
+  font-size: 13px;
+  color: var(--color-danger);
+  padding: 5px 12px;
+  border-radius: 8px;
+  background: var(--color-surface);
+}
+
+.memory-core__clear-btn:active {
+  background: var(--color-border);
+}
+
+.memory-core__confirm-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.memory-core__confirm-text {
+  flex: 1;
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.memory-core__confirm-yes {
+  padding: 6px 14px;
+  border-radius: 8px;
+  background: var(--color-danger);
+  color: #fff;
+  font-size: 13px;
+}
+
+.memory-core__confirm-no {
+  padding: 6px 14px;
+  border-radius: 8px;
+  background: var(--color-surface-raised);
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+/* ===== 列表 ===== */
+
+.memory-core__empty {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  margin: 0;
+}
+
+.memory-core__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.memory-core__item {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.memory-core__item-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.memory-core__tag {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--color-surface-raised);
+  color: var(--color-text-secondary);
+}
+
+.memory-core__time {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.memory-core__content {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.memory-core__item-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.memory-core__item-btn {
+  padding: 5px 14px;
+  font-size: 13px;
+  border-radius: 14px;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+}
+
+.memory-core__item-btn:active {
+  background: var(--color-border);
+}
+
+.memory-core__item-btn--danger {
+  color: var(--color-danger);
+}
+
+/* ===== 编辑框 ===== */
+
+.memory-core__edit-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.memory-core__edit-input {
+  font: inherit;
+  font-size: 14px;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-primary);
+  border-radius: 8px;
+  padding: 8px 10px;
+  outline: none;
+  resize: none;
+  line-height: 1.6;
+}
+
+.memory-core__edit-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.memory-core__edit-save {
+  padding: 6px 16px;
+  border-radius: 8px;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 13px;
+}
+
+.memory-core__edit-cancel {
+  padding: 6px 16px;
+  border-radius: 8px;
+  background: var(--color-surface-raised);
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}

@@ -7,9 +7,10 @@ import './ChatRoom.css'
 interface ChatRoomProps {
   onBack: () => void
   onOpenStory: () => void
+  onOpenMemory: () => void
 }
 
-export default function ChatRoom({ onBack, onOpenStory }: ChatRoomProps) {
+export default function ChatRoom({ onBack, onOpenStory, onOpenMemory }: ChatRoomProps) {
   const { character, messages, streamingText, error, send, sending } = useChatRoom()
 
   if (!character) {
@@ -25,9 +26,14 @@ export default function ChatRoom({ onBack, onOpenStory }: ChatRoomProps) {
       title={character.name}
       onBack={onBack}
       action={
-        <button className="chat-room__story-btn" onClick={onOpenStory}>
-          剧情
-        </button>
+        <div className="chat-room__header-btns">
+          <button className="chat-room__story-btn" onClick={onOpenMemory}>
+            记忆
+          </button>
+          <button className="chat-room__story-btn" onClick={onOpenStory}>
+            剧情
+          </button>
+        </div>
       }
     >
       <div className="chat-room">
