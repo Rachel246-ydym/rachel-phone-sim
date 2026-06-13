@@ -16,6 +16,7 @@ import type {
 import type { ChatAction } from './actions/chat'
 import type { ProfileAction } from './actions/profile'
 import { get, getAll } from '../services/storage'
+import { applyTheme } from '../services/theme'
 
 export type AppAction = ChatAction | ProfileAction
 
@@ -112,6 +113,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
       if (displayEntry?.value) {
         dispatch({ type: 'profile/setDisplaySettings', settings: displayEntry.value })
+        if (displayEntry.value.themeId) {
+          applyTheme(displayEntry.value.themeId)
+        }
       }
       if (assignEntry?.value) {
         dispatch({ type: 'profile/setFeatureApiAssignment', assignment: assignEntry.value })

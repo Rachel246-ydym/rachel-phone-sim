@@ -1,28 +1,29 @@
+import { Home, User } from 'lucide-react'
 import './Navigation.css'
 
-export type TabId = 'chat' | 'profile'
+export type TabId = 'home' | 'profile'
 
 interface NavigationProps {
   active: TabId
   onChange: (tab: TabId) => void
 }
 
-const TABS: Array<{ id: TabId; label: string; icon: string }> = [
-  { id: 'chat', label: '聊天', icon: '💬' },
-  { id: 'profile', label: '我的', icon: '👤' },
+const TABS: Array<{ id: TabId; label: string; Icon: typeof Home }> = [
+  { id: 'home', label: '主屏', Icon: Home },
+  { id: 'profile', label: '我的', Icon: User },
 ]
 
 export default function Navigation({ active, onChange }: NavigationProps) {
   return (
     <nav className="navigation">
-      {TABS.map((tab) => (
+      {TABS.map(({ id, label, Icon }) => (
         <button
-          key={tab.id}
-          className={`navigation__tab${active === tab.id ? ' navigation__tab--active' : ''}`}
-          onClick={() => onChange(tab.id)}
+          key={id}
+          className={`navigation__tab${active === id ? ' navigation__tab--active' : ''}`}
+          onClick={() => onChange(id)}
         >
-          <span className="navigation__icon">{tab.icon}</span>
-          <span className="navigation__label">{tab.label}</span>
+          <Icon size={22} strokeWidth={active === id ? 2.2 : 1.8} />
+          <span className="navigation__label">{label}</span>
         </button>
       ))}
     </nav>

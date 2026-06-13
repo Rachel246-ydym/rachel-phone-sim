@@ -6,6 +6,8 @@ export type NarrativePerson = 'first' | 'third' | 'mixed'
 
 export type StoryTheme = 'dark' | 'light' | 'cream' | 'navy'
 
+export type ThemeId = 'mono' | 'blue' | 'green' | 'pink' | 'lavender' | 'dark'
+
 export type ReplyMode = 'manual' | 'auto-interruptible' | 'auto-uninterruptible'
 
 export type MemoryTag =
@@ -166,6 +168,7 @@ export interface UserProfile {
 export interface DisplaySettings {
   fullscreen: boolean
   homePageMode: 'slide' | 'flip'
+  themeId?: ThemeId
 }
 
 export interface Moment {

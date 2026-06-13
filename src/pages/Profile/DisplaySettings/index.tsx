@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import SubPage from '../../../components/SubPage'
 import { useAppDispatch, useAppState } from '../../../store/AppContext'
 import { put } from '../../../services/storage'
+import { THEMES, applyTheme } from '../../../services/theme'
 import type { DisplaySettings } from '../../../types'
+import type { ThemeId } from '../../../types'
 import './DisplaySettings.css'
 
 export default function DisplaySettings({ onBack }: { onBack: () => void }) {
@@ -11,11 +13,13 @@ export default function DisplaySettings({ onBack }: { onBack: () => void }) {
 
   const [fullscreen, setFullscreen] = useState(displaySettings.fullscreen)
   const [homePageMode, setHomePageMode] = useState<'slide' | 'flip'>(displaySettings.homePageMode)
+  const [themeId, setThemeId] = useState<ThemeId>(displaySettings.themeId ?? 'green')
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
     setFullscreen(displaySettings.fullscreen)
     setHomePageMode(displaySettings.homePageMode)
+    setThemeId(displaySettings.themeId ?? 'green')
   }, [displaySettings])
 
   useEffect(() => {
@@ -26,8 +30,13 @@ export default function DisplaySettings({ onBack }: { onBack: () => void }) {
     }
   }, [fullscreen])
 
+  function handleThemeSelect(id: ThemeId) {
+    setThemeId(id)
+    applyTheme(id)
+  }
+
   async function handleSave() {
-    const settings: DisplaySettings = { fullscreen, homePageMode }
+    const settings: DisplaySettings = { fullscreen, homePageMode, themeId }
     await put('settings', { id: 'displaySettings', value: settings })
     dispatch({ type: 'profile/setDisplaySettings', settings })
     setSaved(true)
@@ -47,6 +56,29 @@ export default function DisplaySettings({ onBack }: { onBack: () => void }) {
   return (
     <SubPage title="显示设置" onBack={onBack}>
       <div className="ds">
+        <p className="ds__section-title">主题色</p>
+        <div className="ds__block">
+          <div className="ds__row ds__row--col">
+            <div className="ds__label">选择主题</div>
+            <div className="ds__theme-row">
+              {THEMES.map((theme) => (
+                <button
+                  key={theme.id}
+                  className={`ds__theme-swatch${themeId === theme.id ? ' ds__theme-swatch--active' : ''}`}
+                  style={{ background: theme.swatch }}
+                  onClick={() => handleThemeSelect(theme.id)}
+                  title={theme.label}
+                >
+                  {themeId === theme.id && <span className="ds__theme-check">✓</span>}
+                </button>
+              ))}
+            </div>
+            <div className="ds__hint">
+              当前：{THEMES.find((t) => t.id === themeId)?.label ?? '淡绿'}
+            </div>
+          </div>
+        </div>
+
         <p className="ds__section-title">界面显示</p>
         <div className="ds__block">
           <div className="ds__row">

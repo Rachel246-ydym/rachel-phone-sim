@@ -8,9 +8,13 @@ import ChatSettings from './Settings'
 
 export type ChatView = 'list' | 'room' | 'story' | 'charProfile' | 'memoryCore' | 'settings'
 
+interface ChatModuleProps {
+  initialView?: ChatView
+}
+
 // 聊天模块入口：模块内部视图切换
-export default function ChatModule() {
-  const [view, setView] = useState<ChatView>('list')
+export default function ChatModule({ initialView = 'list' }: ChatModuleProps) {
+  const [view, setView] = useState<ChatView>(initialView)
 
   switch (view) {
     case 'list':
