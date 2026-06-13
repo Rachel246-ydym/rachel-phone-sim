@@ -26,6 +26,24 @@ export interface ModelParams {
   contextLimit: number
   timeAware: boolean
   memoryCount?: number
+  replyMode?: ReplyMode
+}
+
+export interface AutoSendSettings {
+  enabled: boolean
+  intervalMinutes: number
+}
+
+export interface AutoDailySettings {
+  enabled: boolean
+  time: string
+  branchId: string | null
+}
+
+export interface AutoBehaviorSettings {
+  autoSend: AutoSendSettings
+  autoDiary: AutoDailySettings
+  autoMoments: AutoDailySettings
 }
 
 export interface Character {
@@ -39,6 +57,7 @@ export interface Character {
   createdAt: number
   heartVoiceEnabled?: boolean
   heartVoiceMode?: 'topbar' | 'notification'
+  autoBehavior?: AutoBehaviorSettings
 }
 
 export interface Message {
@@ -131,6 +150,15 @@ export interface UserProfile {
 export interface DisplaySettings {
   fullscreen: boolean
   homePageMode: 'slide' | 'flip'
+}
+
+export interface Moment {
+  id: string
+  characterId: string
+  content: string
+  type: 'diary' | 'moment'
+  branchId: string | null
+  createdAt: number
 }
 
 export interface SettingEntry {

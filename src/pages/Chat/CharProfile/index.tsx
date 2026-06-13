@@ -16,6 +16,8 @@ const DEFAULT_MODEL_PARAMS: ModelParams = {
   stream: true,
   contextLimit: 20,
   timeAware: true,
+  memoryCount: 20,
+  replyMode: 'manual',
 }
 
 type ProfileView = 'list' | 'form' | 'heartVoiceList'

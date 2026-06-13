@@ -3,10 +3,12 @@ import StatusBar from './components/StatusBar'
 import Navigation, { type TabId } from './components/Navigation'
 import ChatModule from './pages/Chat'
 import ProfileModule from './pages/Profile'
+import { useAutoScheduler } from './hooks/useAutoScheduler'
 import './App.css'
 
 export default function App() {
   const [tab, setTab] = useState<TabId>('chat')
+  useAutoScheduler()
 
   return (
     <div className="phone">

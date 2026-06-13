@@ -21,6 +21,7 @@ export default function ChatModule() {
           onBack={() => setView('list')}
           onOpenStory={() => setView('story')}
           onOpenMemory={() => setView('memoryCore')}
+          onOpenSettings={() => setView('settings')}
         />
       )
     case 'story':
@@ -30,6 +31,6 @@ export default function ChatModule() {
     case 'memoryCore':
       return <MemoryCore onBack={() => setView('room')} />
     case 'settings':
-      return <ChatSettings onBack={() => setView('list')} />
+      return <ChatSettings onBack={() => setView('room')} />
   }
 }

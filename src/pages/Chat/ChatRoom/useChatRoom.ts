@@ -154,35 +154,53 @@ export function useChatRoom() {
 
     const memCount = character.modelParams.memoryCount ?? 20
     const memoryContext = await buildMemoryContext(character.id, memCount)
-
-    const aiMessages: AiMessage[] = [
-      { role: 'system', content: buildSystemPrompt(character, memoryContext) },
-      ...[...messages, userMessage].map((m) => ({ role: m.role, content: m.content })),
-    ]
+    const params = character.modelParams
+    const replyMode = params.replyMode ?? 'manual'
+    const replyCount =
+      replyMode === 'manual'
+        ? 1
+        : Math.floor(Math.random() * (params.maxReplies - params.minReplies + 1)) +
+          params.minReplies
+    const systemMsg: AiMessage = {
+      role: 'system',
+      content: buildSystemPrompt(character, memoryContext),
+    }
 
     try {
-      setStreamingText('')
-      const params = character.modelParams
-      const reply = params.stream
-        ? await chatCompletionStream(apiConfig, aiMessages, params, (delta) =>
-            setStreamingText((prev) => (prev ?? '') + delta),
-          )
-        : await chatCompletion(apiConfig, aiMessages, params)
-      const assistantMessage: Message = {
-        id: createId(),
-        characterId: character.id,
-        role: 'assistant',
-        content: reply,
-        timestamp: Date.now(),
+      let historyMessages: Message[] = [...messages, userMessage]
+      let lastReply = ''
+
+      for (let i = 0; i < replyCount; i++) {
+        setStreamingText('')
+        const aiMessages: AiMessage[] = [
+          systemMsg,
+          ...historyMessages.map((m) => ({ role: m.role, content: m.content })),
+        ]
+        const reply = params.stream
+          ? await chatCompletionStream(apiConfig, aiMessages, params, (delta) =>
+              setStreamingText((prev) => (prev ?? '') + delta),
+            )
+          : await chatCompletion(apiConfig, aiMessages, params)
+        lastReply = reply
+        const assistantMessage: Message = {
+          id: createId(),
+          characterId: character.id,
+          role: 'assistant',
+          content: reply,
+          timestamp: Date.now(),
+        }
+        await put('messages', assistantMessage)
+        dispatch({ type: 'chat/appendMessage', message: assistantMessage })
+        historyMessages = [...historyMessages, assistantMessage]
+        if (i < replyCount - 1) {
+          await new Promise<void>((resolve) => setTimeout(resolve, 800))
+        }
       }
-      await put('messages', assistantMessage)
-      dispatch({ type: 'chat/appendMessage', message: assistantMessage })
 
       // fire-and-forget: auto-summary + heart voice
-      const allChatMessages = [...messages, userMessage, assistantMessage]
-      void runAutoSummary(character, allChatMessages, apiConfig)
+      void runAutoSummary(character, historyMessages, apiConfig)
       if (character.heartVoiceEnabled) {
-        void runHeartVoice(character, content, reply, apiConfig, setLatestHeartVoice)
+        void runHeartVoice(character, content, lastReply, apiConfig, setLatestHeartVoice)
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'AI 回复失败，请稍后重试')

@@ -1,7 +1,7 @@
 // IndexedDB 统一封装：所有持久化必须经过本模块，禁止直接使用 localStorage
 
 const DB_NAME = 'rachel-phone-sim'
-const DB_VERSION = 1
+const DB_VERSION = 2
 
 export const STORE_NAMES = [
   'characters',
@@ -14,6 +14,7 @@ export const STORE_NAMES = [
   'settings',
   'apiConfigs',
   'userProfile',
+  'moments',
 ] as const
 
 export type StoreName = (typeof STORE_NAMES)[number]
