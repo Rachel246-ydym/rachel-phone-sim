@@ -7,19 +7,31 @@ export interface CharacterDraft {
   nickname: string
   avatar: string | null
   persona: string
+  heartVoiceEnabled: boolean
+  heartVoiceMode: 'topbar' | 'notification'
 }
 
 interface CharacterFormProps {
   initial: Character | null
   onSave: (draft: CharacterDraft) => Promise<void>
   onDelete?: () => void
+  onViewHeartVoices?: () => void
 }
 
-export default function CharacterForm({ initial, onSave, onDelete }: CharacterFormProps) {
+export default function CharacterForm({
+  initial,
+  onSave,
+  onDelete,
+  onViewHeartVoices,
+}: CharacterFormProps) {
   const [name, setName] = useState(initial?.name ?? '')
   const [nickname, setNickname] = useState(initial?.nickname ?? '')
   const [avatar, setAvatar] = useState<string | null>(initial?.avatar ?? null)
   const [persona, setPersona] = useState(initial?.persona ?? '')
+  const [hvEnabled, setHvEnabled] = useState(initial?.heartVoiceEnabled ?? false)
+  const [hvMode, setHvMode] = useState<'topbar' | 'notification'>(
+    initial?.heartVoiceMode ?? 'topbar',
+  )
   const [saving, setSaving] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -39,6 +51,8 @@ export default function CharacterForm({ initial, onSave, onDelete }: CharacterFo
         nickname: nickname.trim(),
         avatar,
         persona: persona.trim(),
+        heartVoiceEnabled: hvEnabled,
+        heartVoiceMode: hvMode,
       })
     } finally {
       setSaving(false)
@@ -79,6 +93,38 @@ export default function CharacterForm({ initial, onSave, onDelete }: CharacterFo
           placeholder="外形、性格、背景故事……"
         />
       </label>
+
+      {/* 心声设置 */}
+      <div className="char-form__hv-section">
+        <div className="char-form__hv-row">
+          <span className="char-form__hv-label">启用心声</span>
+          <button
+            className={`char-form__toggle${hvEnabled ? ' char-form__toggle--on' : ''}`}
+            onClick={() => setHvEnabled((v) => !v)}
+            aria-label={hvEnabled ? '已开启' : '已关闭'}
+          >
+            <span className="char-form__toggle-knob" />
+          </button>
+        </div>
+        {hvEnabled && (
+          <div className="char-form__hv-mode-row">
+            {(['topbar', 'notification'] as const).map((mode) => (
+              <button
+                key={mode}
+                className={`char-form__hv-chip${hvMode === mode ? ' char-form__hv-chip--active' : ''}`}
+                onClick={() => setHvMode(mode)}
+              >
+                {mode === 'topbar' ? '顶部栏' : '通知弹窗'}
+              </button>
+            ))}
+          </div>
+        )}
+        {onViewHeartVoices && (
+          <button className="char-form__hv-view-btn" onClick={onViewHeartVoices}>
+            查看心声记录
+          </button>
+        )}
+      </div>
 
       <button
         className="char-form__save"

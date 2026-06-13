@@ -37,6 +37,8 @@ export interface Character {
   online: boolean
   modelParams: ModelParams
   createdAt: number
+  heartVoiceEnabled?: boolean
+  heartVoiceMode?: 'topbar' | 'notification'
 }
 
 export interface Message {

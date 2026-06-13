@@ -66,16 +66,56 @@ async function runAutoSummary(
   }
 }
 
+async function runHeartVoice(
+  character: Character,
+  userContent: string,
+  assistantReply: string,
+  apiConfig: ApiConfig,
+  onResult: (voice: string) => void,
+): Promise<void> {
+  const messages: AiMessage[] = [
+    {
+      role: 'system',
+      content: `你正在扮演「${character.name}」。${character.persona ? '\n' + character.persona : ''}`,
+    },
+    {
+      role: 'user',
+      content:
+        `刚才和用户的对话：\n用户："${userContent}"\n你的回复："${assistantReply}"\n\n` +
+        `基于刚才的对话，用第一人称写出你此刻的内心想法，1-2句话，不超过50字。`,
+    },
+  ]
+  const voice = await chatCompletion(apiConfig, messages, {
+    ...character.modelParams,
+    maxTokens: 100,
+    stream: false,
+  })
+  const content = voice.trim()
+  if (!content) return
+  await put('heartVoices', {
+    id: createId(),
+    characterId: character.id,
+    content,
+    createdAt: Date.now(),
+  })
+  onResult(content)
+}
+
 export function useChatRoom() {
   const { characters, activeCharacterId, messages, apiConfigs } = useAppState()
   const dispatch = useAppDispatch()
   const [streamingText, setStreamingText] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [latestHeartVoice, setLatestHeartVoice] = useState<string | null>(null)
   const sendingRef = useRef(false)
 
   const character = characters.find((c) => c.id === activeCharacterId) ?? null
   const apiConfig = apiConfigs.find((c) => c.isPrimary) ?? apiConfigs[0] ?? null
   const characterId = character?.id ?? null
+
+  useEffect(() => {
+    setLatestHeartVoice(null)
+  }, [characterId])
 
   useEffect(() => {
     if (!characterId) return
@@ -138,9 +178,12 @@ export function useChatRoom() {
       await put('messages', assistantMessage)
       dispatch({ type: 'chat/appendMessage', message: assistantMessage })
 
-      // fire-and-forget auto-summary
+      // fire-and-forget: auto-summary + heart voice
       const allChatMessages = [...messages, userMessage, assistantMessage]
       void runAutoSummary(character, allChatMessages, apiConfig)
+      if (character.heartVoiceEnabled) {
+        void runHeartVoice(character, content, reply, apiConfig, setLatestHeartVoice)
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'AI 回复失败，请稍后重试')
     } finally {
@@ -154,6 +197,7 @@ export function useChatRoom() {
     messages,
     streamingText,
     error,
+    latestHeartVoice,
     send,
     sending: streamingText !== null,
   }

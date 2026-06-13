@@ -154,3 +154,54 @@
 .chat-room__send:not(:disabled):active {
   background: var(--color-primary-dim);
 }
+
+/* ===== 心声顶部栏 ===== */
+
+.chat-room__hv-bar {
+  flex-shrink: 0;
+  padding: 7px 16px;
+  background: rgba(76, 175, 125, 0.08);
+  border-bottom: 1px solid rgba(76, 175, 125, 0.18);
+  font-size: 13px;
+  font-style: italic;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===== 心声通知弹窗 ===== */
+
+.hv-notif {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  padding: 48px 16px 14px;
+  background: rgba(18, 18, 20, 0.9);
+  border-bottom: 1px solid var(--color-border);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: hv-slide-in 0.28s ease;
+}
+
+@keyframes hv-slide-in {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+
+.hv-notif__label {
+  margin: 0 0 3px;
+  font-size: 11px;
+  color: var(--color-primary);
+  letter-spacing: 0.06em;
+}
+
+.hv-notif__text {
+  margin: 0;
+  font-size: 14px;
+  font-style: italic;
+  color: var(--color-text);
+  line-height: 1.5;
+}

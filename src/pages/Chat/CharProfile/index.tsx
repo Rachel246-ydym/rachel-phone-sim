@@ -4,6 +4,7 @@ import { useAppDispatch, useAppState } from '../../../store/AppContext'
 import { createId, put, remove } from '../../../services/storage'
 import type { Character, ModelParams } from '../../../types'
 import CharacterForm, { type CharacterDraft } from './CharacterForm'
+import HeartVoiceList from './HeartVoiceList'
 import './CharProfile.css'
 
 const DEFAULT_MODEL_PARAMS: ModelParams = {
@@ -17,10 +18,12 @@ const DEFAULT_MODEL_PARAMS: ModelParams = {
   timeAware: true,
 }
 
+type ProfileView = 'list' | 'form' | 'heartVoiceList'
+
 export default function CharProfile({ onBack }: { onBack: () => void }) {
   const { characters } = useAppState()
   const dispatch = useAppDispatch()
-  const [view, setView] = useState<'list' | 'form'>('list')
+  const [view, setView] = useState<ProfileView>('list')
   const [editingId, setEditingId] = useState<string | null>(null)
 
   const editing = characters.find((c) => c.id === editingId) ?? null
@@ -58,6 +61,16 @@ export default function CharProfile({ onBack }: { onBack: () => void }) {
     setView('list')
   }
 
+  if (view === 'heartVoiceList' && editingId) {
+    return (
+      <HeartVoiceList
+        characterId={editingId}
+        characterName={editing?.name ?? ''}
+        onBack={() => setView('form')}
+      />
+    )
+  }
+
   if (view === 'form') {
     return (
       <SubPage title={editing ? '编辑角色' : '新建角色'} onBack={() => setView('list')}>
@@ -65,6 +78,7 @@ export default function CharProfile({ onBack }: { onBack: () => void }) {
           initial={editing}
           onSave={handleSave}
           onDelete={editing ? handleDelete : undefined}
+          onViewHeartVoices={editing ? () => setView('heartVoiceList') : undefined}
         />
       </SubPage>
     )

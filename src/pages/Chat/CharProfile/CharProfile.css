@@ -167,3 +167,161 @@
   color: var(--color-danger);
   font-size: 16px;
 }
+
+/* ===== 心声设置区 ===== */
+
+.char-form__hv-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  background: var(--color-surface);
+  border-radius: 10px;
+}
+
+.char-form__hv-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.char-form__hv-label {
+  font-size: 15px;
+  color: var(--color-text);
+}
+
+.char-form__toggle {
+  position: relative;
+  width: 44px;
+  height: 26px;
+  border-radius: 13px;
+  background: var(--color-border);
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.char-form__toggle--on {
+  background: var(--color-primary);
+}
+
+.char-form__toggle-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+}
+
+.char-form__toggle--on .char-form__toggle-knob {
+  transform: translateX(18px);
+}
+
+.char-form__hv-mode-row {
+  display: flex;
+  gap: 8px;
+}
+
+.char-form__hv-chip {
+  flex: 1;
+  padding: 8px 4px;
+  border-radius: 8px;
+  font-size: 13px;
+  background: var(--color-surface-raised);
+  color: var(--color-text-secondary);
+  border: 2px solid transparent;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.char-form__hv-chip--active {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.char-form__hv-view-btn {
+  padding: 9px;
+  border-radius: 8px;
+  font-size: 14px;
+  text-align: center;
+  background: var(--color-surface-raised);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+}
+
+/* ===== 心声记录列表 ===== */
+
+.hv-list__clear-trigger {
+  font-size: 14px;
+  color: var(--color-danger);
+  padding: 4px 8px;
+}
+
+.hv-list__confirm {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.hv-list__confirm-text {
+  flex: 1;
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.hv-list__confirm-yes {
+  padding: 5px 12px;
+  border-radius: 8px;
+  background: var(--color-danger);
+  color: #fff;
+  font-size: 13px;
+}
+
+.hv-list__confirm-no {
+  padding: 5px 12px;
+  border-radius: 8px;
+  background: var(--color-surface-raised);
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+.hv-list__empty {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  margin: 0;
+}
+
+.hv-list__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.hv-list__item {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hv-list__time {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.hv-list__content {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.7;
+  font-style: italic;
+  color: var(--color-text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
