@@ -12,7 +12,7 @@ type AppTab = 'home' | 'chat' | 'profile'
 
 export default function App() {
   const [tab, setTab] = useState<AppTab>('home')
-  const [chatInitView, setChatInitView] = useState<ChatView>('list')
+  const [chatInitView, setChatInitView] = useState<ChatView>('room')
   const dispatch = useAppDispatch()
   useAutoScheduler()
 

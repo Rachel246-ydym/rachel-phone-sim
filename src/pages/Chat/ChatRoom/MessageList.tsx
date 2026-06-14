@@ -8,13 +8,16 @@ interface MessageListProps {
   error: string | null
 }
 
-// 把 *动作描写* 渲染为斜体，区别于对话文本
-function renderContent(content: string): ReactNode[] {
+function renderContent(content: string, actionEnabled: boolean): ReactNode[] {
   return content.split(/(\*[^*]+\*)/g).map((part, i) =>
     part.startsWith('*') && part.endsWith('*') && part.length > 2 ? (
-      <em key={i} className="chat-room__action">
-        {part.slice(1, -1)}
-      </em>
+      actionEnabled ? (
+        <em key={i} className="chat-room__action">
+          {part.slice(1, -1)}
+        </em>
+      ) : (
+        <span key={i}>{part.slice(1, -1)}</span>
+      )
     ) : (
       <span key={i}>{part}</span>
     ),
@@ -40,6 +43,7 @@ export default function MessageList({
   error,
 }: MessageListProps) {
   const listRef = useRef<HTMLDivElement>(null)
+  const actionEnabled = character.actionDescEnabled ?? true
 
   useEffect(() => {
     const el = listRef.current
@@ -60,7 +64,7 @@ export default function MessageList({
           <div
             className={`chat-room__bubble ${m.role === 'user' ? 'chat-room__bubble--user' : 'chat-room__bubble--char'}`}
           >
-            {renderContent(m.content)}
+            {renderContent(m.content, actionEnabled)}
           </div>
         </div>
       ))}
@@ -71,7 +75,7 @@ export default function MessageList({
             {streamingText === '' ? (
               <span className="chat-room__typing">正在输入…</span>
             ) : (
-              renderContent(streamingText)
+              renderContent(streamingText, actionEnabled)
             )}
           </div>
         </div>

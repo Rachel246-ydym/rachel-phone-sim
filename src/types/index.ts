@@ -60,6 +60,7 @@ export interface Character {
   heartVoiceEnabled?: boolean
   heartVoiceMode?: 'topbar' | 'notification'
   autoBehavior?: AutoBehaviorSettings
+  actionDescEnabled?: boolean
 }
 
 export interface Message {
