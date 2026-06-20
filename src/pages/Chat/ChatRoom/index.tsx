@@ -104,15 +104,18 @@ export default function ChatRoom({ onOpenStory, onOpenMemory, onOpenCharProfile 
         onClose={() => setSearchOpen(false)}
       />
       <div className="chat-page__body">
-        {hvMode === 'topbar' && latestHeartVoice && (
-          <div className="chat-room__hv-bar">{latestHeartVoice}</div>
-        )}
         <MessageList
           messages={messages}
           character={character}
           streamingText={streamingText}
           error={error}
         />
+        {hvMode === 'topbar' && latestHeartVoice && (
+          <div className="chat-room__hv-bar">
+            <span className="chat-room__hv-icon">🌙</span>
+            {latestHeartVoice}
+          </div>
+        )}
         <InputBar disabled={sending} onSend={(text) => void send(text)} />
       </div>
       <CharInfoPanel

@@ -8,6 +8,11 @@ interface MessageListProps {
   error: string | null
 }
 
+function formatTime(ts: number): string {
+  const d = new Date(ts)
+  return d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0')
+}
+
 function renderContent(content: string, actionEnabled: boolean): ReactNode[] {
   return content.split(/(\*[^*]+\*)/g).map((part, i) =>
     part.startsWith('*') && part.endsWith('*') && part.length > 2 ? (
@@ -61,22 +66,31 @@ export default function MessageList({
           className={`chat-room__row ${m.role === 'user' ? 'chat-room__row--user' : 'chat-room__row--char'}`}
         >
           {m.role === 'assistant' && <Avatar character={character} />}
-          <div
-            className={`chat-room__bubble ${m.role === 'user' ? 'chat-room__bubble--user' : 'chat-room__bubble--char'}`}
-          >
-            {renderContent(m.content, actionEnabled)}
+          <div className="chat-room__bubble-col">
+            <div
+              className={`chat-room__bubble ${m.role === 'user' ? 'chat-room__bubble--user' : 'chat-room__bubble--char'}`}
+            >
+              {renderContent(m.content, actionEnabled)}
+            </div>
+            <time className="chat-room__time">{formatTime(m.timestamp)}</time>
           </div>
         </div>
       ))}
       {streamingText !== null && (
         <div className="chat-room__row chat-room__row--char">
           <Avatar character={character} />
-          <div className="chat-room__bubble chat-room__bubble--char">
-            {streamingText === '' ? (
-              <span className="chat-room__typing">正在输入…</span>
-            ) : (
-              renderContent(streamingText, actionEnabled)
-            )}
+          <div className="chat-room__bubble-col">
+            <div className="chat-room__bubble chat-room__bubble--char">
+              {streamingText === '' ? (
+                <span className="chat-room__typing">
+                  <span className="chat-room__dot" />
+                  <span className="chat-room__dot" />
+                  <span className="chat-room__dot" />
+                </span>
+              ) : (
+                renderContent(streamingText, actionEnabled)
+              )}
+            </div>
           </div>
         </div>
       )}
