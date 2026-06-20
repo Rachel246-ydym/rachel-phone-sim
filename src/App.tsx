@@ -4,6 +4,7 @@ import Navigation, { type TabId } from './components/Navigation'
 import HomeModule from './pages/Home'
 import ChatModule, { type ChatView } from './pages/Chat'
 import ProfileModule from './pages/Profile'
+import ThemeToggle from './pages/Home/ThemeToggle'
 import { useAppDispatch } from './store/AppContext'
 import { useAutoScheduler } from './hooks/useAutoScheduler'
 import './App.css'
@@ -24,10 +25,22 @@ export default function App() {
     setTab('chat')
   }
 
-  const navActive: TabId = tab === 'profile' ? 'profile' : 'home'
+  const navActive: TabId =
+    tab === 'profile' ? 'profile'
+    : tab === 'chat' && chatInitView === 'story' ? 'story'
+    : tab === 'chat' ? 'chat'
+    : 'home'
 
   function handleNavChange(navTab: TabId) {
-    setTab(navTab)
+    if (navTab === 'story') {
+      openChat('story')
+    } else if (navTab === 'chat') {
+      openChat('room')
+    } else if (navTab === 'home') {
+      setTab('home')
+    } else {
+      setTab('profile')
+    }
   }
 
   return (
@@ -38,6 +51,7 @@ export default function App() {
         {tab === 'chat' && <ChatModule initialView={chatInitView} />}
         {tab === 'profile' && <ProfileModule />}
       </main>
+      <ThemeToggle />
       <Navigation active={navActive} onChange={handleNavChange} />
     </div>
   )

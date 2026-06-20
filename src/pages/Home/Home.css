@@ -1,177 +1,419 @@
+/* ── Home layout ── */
 .home {
-  padding: 20px 16px 12px;
+  padding: 20px 16px calc(80px + 24px);
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
+  background: var(--bg-screen);
+  min-height: 100%;
+  box-sizing: border-box;
 }
 
-/* ── Widgets row ── */
-.home__widgets {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+/* ── Greeting ── */
+.home__greeting {
+  padding: 4px 0 4px;
+}
+
+.home__greeting-text {
+  font-family: 'Noto Serif SC', 'Georgia', 'Times New Roman', serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-title);
+  line-height: 1.2;
+}
+
+.home__greeting-date {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--text-light);
+  letter-spacing: 0.5px;
+}
+
+/* ── Character card ── */
+.char-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 16px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  outline: none;
+}
+
+.char-card:active {
+  border-color: var(--color-primary);
+}
+
+.char-card__row {
+  display: flex;
+  align-items: center;
   gap: 12px;
 }
 
-/* ── Calendar ── */
-.home__cal {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 18px;
-  padding: 14px 12px 10px;
+.char-card__avatar-wrap {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
 }
 
-.home__cal-header {
+.char-card__avatar-img {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--color-primary);
+}
+
+.char-card__avatar-initial {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--color-primary-light);
+  border: 1.5px solid var(--color-primary);
   display: flex;
-  align-items: baseline;
-  gap: 5px;
-  margin-bottom: 10px;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Noto Serif SC', 'Georgia', serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-primary);
 }
 
-.home__cal-month {
+.char-card__online-dot {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--color-sage);
+  border: 2px solid var(--bg-card);
+  bottom: 0;
+  right: 0;
+}
+
+.char-card__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.char-card__name {
   font-size: 16px;
   font-weight: 600;
-  color: var(--color-text);
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.home__cal-year {
+.char-card__status {
+  margin-top: 2px;
   font-size: 11px;
-  color: var(--color-text-secondary);
+  color: var(--color-sage);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.home__cal-dow {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  margin-bottom: 3px;
+.char-card__chevron {
+  color: var(--text-light);
+  flex-shrink: 0;
 }
 
-.home__cal-dow-cell {
-  text-align: center;
-  font-size: 9px;
-  color: var(--color-text-secondary);
-  padding-bottom: 3px;
-}
-
-.home__cal-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  row-gap: 2px;
-}
-
-.home__cal-day {
-  text-align: center;
-  font-size: 11px;
-  color: var(--color-text);
-  aspect-ratio: 1;
+.char-card__voice {
+  margin-top: 12px;
+  background: var(--bg-input);
+  border-radius: 8px;
+  padding: 10px 12px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
+  align-items: flex-start;
+  gap: 8px;
 }
 
-.home__cal-day--today {
-  background: var(--color-primary);
-  color: #fff;
-  font-weight: 700;
+.char-card__voice-accent {
+  width: 2px;
+  min-height: 16px;
+  align-self: stretch;
+  background: var(--color-primary-light);
+  border-radius: 1px;
+  flex-shrink: 0;
 }
 
-/* ── Character widget ── */
-.home__char {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 18px;
+.char-card__voice-text {
+  font-size: 12px;
+  font-style: italic;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ── About Us card ── */
+.about-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 20px 16px;
+}
+
+.about-card__header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.about-card__title {
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.about-card__since {
+  margin-top: 3px;
+  font-family: 'Georgia', serif;
+  font-style: italic;
+  font-size: 11px;
+  color: var(--color-primary);
+  letter-spacing: 0.5px;
+}
+
+.about-card__stats {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 20px 12px 16px;
   gap: 10px;
 }
 
-.home__char-avatar {
-  width: 76px;
-  height: 76px;
-  border-radius: 20px;
-  background: var(--color-surface-raised);
-  border: 1px solid var(--color-border);
+.about-card__stat-row {
   display: flex;
   align-items: center;
-  justify-content: center;
-  overflow: hidden;
+  gap: 8px;
 }
 
-.home__char-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.home__char-initial {
-  font-size: 30px;
-  color: var(--color-primary);
-  font-weight: 600;
-  line-height: 1;
-}
-
-.home__char-placeholder {
-  color: var(--color-text-secondary);
-}
-
-.home__char-name {
+.about-card__stat-label {
+  width: 52px;
+  text-align: right;
   font-size: 12px;
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.about-card__stat-level {
+  width: 28px;
   text-align: center;
-  max-width: 100%;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.about-card__bar-track {
+  flex: 1;
+  height: 6px;
+  background: var(--bg-input);
+  border-radius: 3px;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+}
+
+.about-card__bar-fill {
+  height: 100%;
+  border-radius: 3px;
+}
+
+.about-card__stat-value {
+  width: 28px;
+  text-align: right;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Emotion heatmap ── */
+.emotion-map {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 16px;
+}
+
+.emotion-map__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.emotion-map__month {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.emotion-map__count {
+  font-size: 11px;
+  color: var(--text-light);
+}
+
+.emotion-map__dow {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 4px;
+}
+
+.emotion-map__dow-label {
+  text-align: center;
+  font-size: 9px;
+  color: var(--text-light);
+  font-weight: 500;
+  padding-bottom: 2px;
+}
+
+.emotion-map__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+
+.emotion-map__cell {
+  aspect-ratio: 1;
+  border-radius: 4px;
+}
+
+.emotion-map__cell--empty {
+  background: transparent !important;
+}
+
+.emotion-map__cell--future {
+  background: transparent !important;
+  border: 1px dashed var(--border-light);
+}
+
+.emotion-map__legend {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.emotion-map__legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.emotion-map__legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.emotion-map__legend-text {
+  font-size: 10px;
+  color: var(--text-secondary);
 }
 
 /* ── App icon grid ── */
-.home__grid {
-  display: flex;
-  gap: 24px;
-  justify-content: center;
-  padding: 4px 0;
+.app-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  row-gap: 20px;
 }
 
-.home__app-icon {
+.app-grid__item {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  width: 68px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
 }
 
-.home__app-icon-bg {
-  width: 56px;
-  height: 56px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  color: var(--color-primary);
-  transition: transform 0.1s;
-}
-
-.home__app-icon:active .home__app-icon-bg {
-  transform: scale(0.94);
-}
-
-.home__app-icon-bg--accent {
-  background: var(--color-primary);
-  color: #fff;
-  border-color: transparent;
-}
-
-.home__app-icon--disabled {
-  opacity: 0.35;
+.app-grid__item--disabled {
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
-.home__app-icon-label {
-  font-size: 12px;
-  color: var(--color-text-secondary);
-  text-align: center;
+.app-grid__icon {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s;
+}
+
+.app-grid__item:not(.app-grid__item--disabled):active .app-grid__icon {
+  transform: scale(0.92);
+}
+
+.app-grid__badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  border-radius: 8px;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-grid__label {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+/* ── Recent list ── */
+.recent-list {
+  padding-bottom: 8px;
+}
+
+.recent-list__title {
+  font-size: 11px;
+  color: var(--text-light);
+  letter-spacing: 0.8px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.recent-list__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+}
+
+.recent-list__item--bordered {
+  border-bottom: 1px solid var(--border-light);
+}
+
+.recent-list__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.recent-list__text {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recent-list__date {
+  font-size: 11px;
+  color: var(--text-light);
+  flex-shrink: 0;
 }

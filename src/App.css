@@ -2,10 +2,11 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: var(--color-bg);
+  background: var(--bg-screen);
   margin: 0 auto;
   max-width: 480px;
   overflow: hidden;
+  position: relative;
 }
 
 /* 桌面端显示为居中的手机框，移动端铺满全屏 */
@@ -13,7 +14,7 @@
   .phone {
     height: min(860px, 95vh);
     margin-top: calc((100vh - min(860px, 95vh)) / 2);
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--border);
     border-radius: 36px;
   }
 }
@@ -22,4 +23,27 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+}
+
+/* ── Theme toggle (floating, inside .phone) ── */
+.theme-toggle {
+  position: absolute;
+  bottom: calc(80px + 16px);
+  right: 16px;
+  z-index: 100;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: transform 0.1s, border-color 0.15s;
+}
+
+.theme-toggle:active {
+  transform: scale(0.9);
 }
