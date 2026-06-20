@@ -8,6 +8,8 @@ export type StoryTheme = 'dark' | 'light' | 'cream' | 'navy'
 
 export type ThemeId = 'mono' | 'blue' | 'green' | 'pink' | 'lavender' | 'dark'
 
+export type ThemeMode = 'light' | 'dark'
+
 export type ReplyMode = 'manual' | 'auto-interruptible' | 'auto-uninterruptible'
 
 export type MemoryTag =
@@ -170,6 +172,7 @@ export interface DisplaySettings {
   fullscreen: boolean
   homePageMode: 'slide' | 'flip'
   themeId?: ThemeId
+  themeMode?: ThemeMode
 }
 
 export interface Moment {

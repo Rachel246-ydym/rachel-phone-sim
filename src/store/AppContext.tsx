@@ -17,6 +17,7 @@ import type { ChatAction } from './actions/chat'
 import type { ProfileAction } from './actions/profile'
 import { get, getAll } from '../services/storage'
 import { applyTheme } from '../services/theme'
+import { applyThemeMode } from '../styles/theme'
 
 export type AppAction = ChatAction | ProfileAction
 
@@ -93,6 +94,10 @@ const DispatchContext = createContext<Dispatch<AppAction> | null>(null)
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState)
+
+  useEffect(() => {
+    applyThemeMode(state.displaySettings.themeMode ?? 'light')
+  }, [state.displaySettings.themeMode, state.displaySettings.themeId])
 
   useEffect(() => {
     let cancelled = false

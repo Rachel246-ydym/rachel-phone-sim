@@ -1,89 +1,65 @@
-# CLAUDE.md — Rachel Phone Simulator
+# CLAUDE.md — rachel-phone-sim
 
-## 项目简介
+## 项目概述
 
-手机模拟器 PWA，核心功能：AI 角色互动聊天（含线下剧情模式）+ 个人设置管理。
-用户：京京（Rachel），中文界面。
-AI 角色：江浔（主角色），支持多角色创建。
-AI 服务：DeepSeek API（deepseek-v4-pro）。
-数据持久化：IndexedDB（通过封装的 storage service，禁止直接使用 localStorage）。
+AI 角色陪伴手机模拟器 PWA。用户在模拟手机界面中与 AI 角色聊天、阅读/创作剧情、管理角色记忆。
 
 ## 技术栈
 
-- React 19 + TypeScript + Vite
-- IndexedDB（统一 storage service 封装）
-- DeepSeek API（主 API）
-- 部署：GitHub Pages（gh-pages 分支）
+* React 19 + TypeScript + Vite
+* 存储：IndexedDB（不使用 localStorage）
+* AI API：DeepSeek（deepseek-v4-pro）
+* 部署：GitHub Pages（gh-pages 分支）
 
-## 构建命令
+## 关键约定
 
-```bash
-npm install
-npm run dev        # 开发服务器
-npm run build      # 类型检查 + 生产构建（每次改动后必须运行）
-npx tsc --noEmit   # 仅类型检查
-```
+* 所有开发只在 main 分支进行，不创建新分支
+* 每次修改后必须 `npm run build` 确认无报错
+* 单个组件文件不超过 300 行，超过必须拆分
+* commit 后 push 到 main，GitHub Actions 自动部署到 gh-pages
 
-## 当前重点模块
-
-1. 聊天模块 — 线下剧情模式（长篇叙事 + 剧情分支）、角色档案、记忆核心、情感连贯性
-2. "我的"模块 — API 设置、显示设置
-
-## 架构原则
-
-- 模块独立：每个功能模块在 src/pages/ 下独立文件夹，模块间不直接引用
-- 公共数据通过全局 Context + useReducer 共享，action types 按模块分文件
-- 存储层抽象：所有持久化通过 src/services/storage.ts 统一接口
-- AI 调用层抽象：所有 API 调用通过 src/services/ai.ts 统一接口
-- 组件拆分：单文件不超过 300 行，逻辑抽到 hooks，UI 拆子组件
-
-## 文件结构
+## 目录结构
 
 ```
-rachel-phone-sim/
-├── CLAUDE.md
-├── docs/
-│   └── architecture.md      # 完整功能规格书（用 @docs/architecture.md 引用）
-└── src/
-    ├── main.tsx
-    ├── App.tsx               # 路由容器
-    ├── types/
-    │   └── index.ts          # 所有 TypeScript 类型（单一来源）
-    ├── store/
-    │   ├── AppContext.tsx     # 全局 Context + useReducer
-    │   └── actions/          # action types 按模块分文件
-    ├── services/
-    │   ├── storage.ts        # IndexedDB 封装（统一读写接口）
-    │   ├── ai.ts             # DeepSeek API 调用封装
-    │   └── memory.ts         # 记忆核心逻辑（自动总结、标签、筛选）
-    ├── hooks/                # 可复用 hooks
-    ├── components/           # 公共组件（StatusBar, Navigation 等）
-    └── pages/
-        ├── Chat/             # 聊天模块
-        │   ├── ChatList/     # 联系人列表
-        │   ├── ChatRoom/     # 聊天室（私聊/群聊）
-        │   ├── StoryMode/    # 线下剧情模式（长篇叙事 + 分支 + 存档）
-        │   ├── CharProfile/  # 角色档案设置
-        │   ├── MemoryCore/   # 记忆核心管理
-        │   └── Settings/     # 聊天设置（模型参数、自动行为等）
-        └── Profile/          # "我的"模块
-            ├── ApiSettings/  # API 配置
-            └── DisplaySettings/ # 显示设置
+src/
+├── components/     # 页面组件和 UI 组件
+├── contexts/       # React Context + useReducer 全局状态
+├── services/       # IndexedDB 存储服务、API 调用
+├── types/          # TypeScript 类型定义（10 个 Store）
+├── hooks/          # 自定义 hooks（useAutoScheduler 等）
+├── styles/         # 全局样式和主题变量
+├── App.tsx         # 根组件，路由和导航
+└── main.tsx        # 入口
 ```
 
-## 开发规范
+## 已完成功能模块
 
-- 函数组件 + Hooks，禁止 class 组件
-- TypeScript 严格模式，禁用 any
-- CSS 每个页面对应一个 .css 文件，通过 CSS 变量共享颜色
-- 主色：#4CAF7D，移动优先设计
-- 动作描写用 * 包裹（如 *他低头笑了笑*）区别于对话文本
+1. 角色档案 CRUD（头像、名称、昵称、人设）
+2. 聊天室（消息气泡、DeepSeek 流式输出、多条回复）
+3. 线下剧情模式（长篇叙事/短线下/IF线、分支系统、存档）
+4. 记忆系统（自动总结、手动添加、标签筛选、注入 system prompt）
+5. 心声系统（自动生成、顶部栏/弹窗两种显示模式）
+6. 模型参数面板（温度/TopP/max tokens 等 9 项）
+7. 自动行为（自动发消息/日记/朋友圈，绑定 IF 线）
+8. API 设置（主副 API、用量账本）
+9. 主题系统（6 个预设主题，CSS 变量注入）
+10. 主屏幕（日历小组件、角色照片、App 图标网格）
+11. 聊天室 UI（顶栏、侧滑面板、联络人浮层、搜索栏）
 
-## 禁止事项
+## 当前 UI 重构任务
 
-- 不要创建新分支，所有工作直接在 main 分支上 commit
-- 不要一次修改多个不相关的模块
-- 改动后必须确认 npm run build 无报错
-- 不要使用 localStorage，统一使用 IndexedDB storage service
-- 不要在单个组件文件中超过 300 行
-- 不要添加多余注释，只在"为什么"不显而易见时写注释
+正在进行视觉层全面更新（保持功能逻辑不变），设计规范：
+
+* 色调：暖奶油底 `#FAF6F0`，主色赤陶玫瑰 `#C17C74`
+* 卡片：1px 边框 `#E4DCD2`，不使用 box-shadow
+* 图标：全部 outline 线条风格，stroke-width 1.5
+* 英文/数字：衬线体标签 + tabular 数字
+* 支持日间/夜间模式切换
+* 详细设计变量见 src/styles/theme.ts
+
+## 注意事项
+
+* 不要使用 localStorage，所有持久化走 IndexedDB
+* 不要创建新分支
+* 修改样式时使用 CSS 变量（var(--xxx)），不要硬编码颜色值
+* 每个任务完成后 npm run build + commit + push
