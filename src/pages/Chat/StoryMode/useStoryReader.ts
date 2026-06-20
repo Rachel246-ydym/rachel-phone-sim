@@ -141,6 +141,35 @@ export function useStoryReader(character: Character, storyId: string, settings: 
     }
   }
 
+  async function continueStory() {
+    if (!story || busyRef.current) return
+    busyRef.current = true
+    setError(null)
+    try {
+      setStreamingText('')
+      const reply = await generate(messages, (delta) =>
+        setStreamingText((prev) => (prev ?? '') + delta),
+      )
+      const segment: Message = {
+        id: createId(),
+        characterId: character.id,
+        role: 'assistant',
+        content: reply,
+        timestamp: Date.now(),
+        storyId: story.id,
+        storyBranchId: story.activeBranchId,
+      }
+      await put('messages', segment)
+      setMessages((prev) => [...prev, segment])
+      await touchStory(story)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '生成失败，请稍后重试')
+    } finally {
+      setStreamingText(null)
+      busyRef.current = false
+    }
+  }
+
   async function regenerate(segmentId: string) {
     const index = messages.findIndex((m) => m.id === segmentId)
     const target = messages[index]
@@ -283,6 +312,7 @@ export function useStoryReader(character: Character, storyId: string, settings: 
     error,
     busy: streamingText !== null,
     send,
+    continueStory,
     regenerate,
     editSegment,
     deleteSegment,
