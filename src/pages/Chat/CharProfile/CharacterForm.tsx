@@ -20,6 +20,7 @@ export interface CharacterDraft {
   modelParams: ModelParams
   autoBehavior: AutoBehaviorSettings
   autoSummary: { enabled: boolean; every: number }
+  memoryMaxSummaryLength: number
 }
 
 export const DEFAULT_MODEL_PARAMS: ModelParams = {
@@ -82,6 +83,7 @@ export default function CharacterForm({
     initial?.autoBehavior ?? DEFAULT_AUTO_BEHAVIOR,
   )
   const [autoSummary, setAutoSummary] = useState({ enabled: false, every: 20 })
+  const [memMaxLength, setMemMaxLength] = useState(initial?.characterSettings?.memoryMaxSummaryLength ?? 100)
   const [saving, setSaving] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -118,6 +120,7 @@ export default function CharacterForm({
         modelParams: params,
         autoBehavior,
         autoSummary,
+        memoryMaxSummaryLength: memMaxLength,
       })
     } finally {
       setSaving(false)
@@ -219,6 +222,19 @@ export default function CharacterForm({
                 <span className="cf2__row-label">轮对话总结一次</span>
               </div>
             )}
+            <div className="cf2__row">
+              <span className="cf2__row-label">总结字数上限</span>
+              <select
+                className="cf2__select"
+                value={memMaxLength}
+                onChange={(e) => setMemMaxLength(Number(e.target.value))}
+              >
+                <option value={50}>50字</option>
+                <option value={100}>100字</option>
+                <option value={150}>150字</option>
+                <option value={200}>200字</option>
+              </select>
+            </div>
             <div className="cf2__row">
               <span className="cf2__row-label">注入记忆条数</span>
               <span className="cf2__row-value">{params.memoryCount ?? 20} 条</span>

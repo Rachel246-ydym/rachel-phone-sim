@@ -1,7 +1,7 @@
 // 记忆核心逻辑：自动总结、标签、筛选（自动总结的 AI 调用在后续阶段接入 ai.ts）
 
 import type { Memory, MemoryTag } from '../types'
-import { createId, getAll, put, remove } from './storage'
+import { createId, get, getAll, put, remove } from './storage'
 
 export async function addMemory(
   characterId: string,
@@ -9,11 +9,14 @@ export async function addMemory(
   tag: MemoryTag,
   source: string,
   branchId?: string,
+  title?: string,
 ): Promise<Memory> {
   const memory: Memory = {
     id: createId(),
     characterId,
     content,
+    title: title ?? '',
+    pinned: false,
     tag,
     source,
     createdAt: Date.now(),
@@ -21,6 +24,14 @@ export async function addMemory(
   }
   await put('memories', memory)
   return memory
+}
+
+export async function togglePinMemory(id: string): Promise<Memory | null> {
+  const mem = await get<Memory>('memories', id)
+  if (!mem) return null
+  const updated: Memory = { ...mem, pinned: !(mem.pinned ?? false) }
+  await put('memories', updated)
+  return updated
 }
 
 export async function listMemories(characterId: string): Promise<Memory[]> {

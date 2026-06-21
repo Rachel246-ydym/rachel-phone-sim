@@ -247,6 +247,25 @@
   color: var(--color-text-secondary);
 }
 
+.memory-core__pin-btn {
+  margin-left: auto;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  padding: 2px;
+}
+
+.memory-core__pin-btn--active {
+  color: var(--color-primary);
+}
+
+.memory-core__title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
 .memory-core__content {
   margin: 0;
   font-size: 14px;

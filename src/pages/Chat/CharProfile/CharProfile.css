@@ -394,6 +394,18 @@
   color: var(--color-primary);
 }
 
+.cf2__select {
+  font: inherit;
+  font-size: 13px;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  padding: 0 10px;
+  outline: none;
+}
+
 .cf2__sub-row {
   display: flex;
   align-items: center;

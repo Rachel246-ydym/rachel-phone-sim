@@ -6,6 +6,7 @@ import {
   clearMemories,
   deleteMemory,
   listMemories,
+  togglePinMemory,
   updateMemory,
 } from '../../../services/memory'
 import type { Memory, MemoryTag } from '../../../types'
@@ -83,6 +84,13 @@ export function useMemoryCore() {
     setAutoSettings(next)
   }
 
+  async function togglePin(id: string): Promise<void> {
+    const updated = await togglePinMemory(id)
+    if (updated) {
+      setMemories((prev) => prev.map((m) => (m.id === id ? updated : m)))
+    }
+  }
+
   return {
     character,
     memories,
@@ -94,5 +102,6 @@ export function useMemoryCore() {
     clearAll,
     clearByTag,
     saveAutoSettings,
+    togglePin,
   }
 }

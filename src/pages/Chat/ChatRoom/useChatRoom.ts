@@ -34,12 +34,13 @@ async function runAutoSummary(
   const assistantCount = allMessages.filter((m) => m.role === 'assistant').length
   if (assistantCount === 0 || assistantCount % auto.every !== 0) return
 
+  const maxLen = character.characterSettings?.memoryMaxSummaryLength ?? 100
   const recent = allMessages.slice(-auto.every * 2)
   const summaryMessages: AiMessage[] = [
     {
       role: 'system',
       content:
-        '你是记忆整理助手。请将以下对话内容整理为一条简洁的核心记忆（3-5句话），客观描述发生了什么，不含主观评价。',
+        `你是记忆整理助手。请将以下对话内容整理为一条核心记忆，格式严格为：【标题】不超过10个字的标题【内容】不超过${maxLen}字的正文。客观描述发生了什么，不含主观评价。`,
     },
     {
       role: 'user',
@@ -51,17 +52,26 @@ async function runAutoSummary(
         '\n\n请生成核心记忆：',
     },
   ]
-  const summary = await chatCompletion(apiConfig, summaryMessages, {
+  const raw = await chatCompletion(apiConfig, summaryMessages, {
     ...character.modelParams,
-    maxTokens: 300,
+    maxTokens: 400,
     stream: false,
   })
-  if (summary.trim()) {
+  if (!raw.trim()) return
+
+  const titleMatch = raw.match(/【标题】(.+?)【内容】/)
+  const contentMatch = raw.match(/【内容】([\s\S]+)$/)
+  const title = titleMatch?.[1]?.trim() ?? ''
+  const content = contentMatch?.[1]?.trim() ?? raw.trim()
+
+  if (content) {
     await addMemory(
       character.id,
-      summary.trim(),
+      content,
       'auto-summary',
       `自动总结（第${assistantCount}轮对话）`,
+      undefined,
+      title,
     )
   }
 }

@@ -1,13 +1,15 @@
 import { useState } from 'react'
+import { Pin } from 'lucide-react'
 import SubPage from '../../../components/SubPage'
 import type { MemoryTag } from '../../../types'
 import { useMemoryCore } from './useMemoryCore'
 import './MemoryCore.css'
 
-type FilterTag = MemoryTag | 'all'
+type FilterTag = MemoryTag | 'all' | 'pinned'
 
 const FILTER_OPTIONS: { value: FilterTag; label: string }[] = [
   { value: 'all', label: '全部' },
+  { value: 'pinned', label: '已固定' },
   { value: 'auto-summary', label: '自动总结' },
   { value: 'manual-add', label: '手动添加' },
   { value: 'self-reflection', label: '角色自剖' },
@@ -35,6 +37,7 @@ export default function MemoryCore({ onBack }: { onBack: () => void }) {
     clearAll,
     clearByTag,
     saveAutoSettings,
+    togglePin,
   } = useMemoryCore()
 
   const [filterTag, setFilterTag] = useState<FilterTag>('all')
@@ -53,8 +56,11 @@ export default function MemoryCore({ onBack }: { onBack: () => void }) {
     )
   }
 
-  const filtered =
-    filterTag === 'all' ? memories : memories.filter((m) => m.tag === filterTag)
+  const filtered = (() => {
+    if (filterTag === 'all') return memories
+    if (filterTag === 'pinned') return memories.filter((m) => m.pinned)
+    return memories.filter((m) => m.tag === filterTag)
+  })()
 
   async function handleAdd() {
     if (!addText.trim() || adding) return
@@ -165,7 +171,7 @@ export default function MemoryCore({ onBack }: { onBack: () => void }) {
           <button className="memory-core__clear-btn" onClick={() => setConfirmClear('all')}>
             清空全部
           </button>
-          {filterTag !== 'all' && (
+          {filterTag !== 'all' && filterTag !== 'pinned' && (
             <button
               className="memory-core__clear-btn"
               onClick={() => setConfirmClear(filterTag as MemoryTag)}
@@ -240,7 +246,17 @@ export default function MemoryCore({ onBack }: { onBack: () => void }) {
                           day: 'numeric',
                         })}
                       </span>
+                      <button
+                        className={`memory-core__pin-btn${m.pinned ? ' memory-core__pin-btn--active' : ''}`}
+                        onClick={() => void togglePin(m.id)}
+                        aria-label={m.pinned ? '取消固定' : '固定'}
+                      >
+                        <Pin size={13} strokeWidth={m.pinned ? 2 : 1.5} />
+                      </button>
                     </div>
+                    {m.title && (
+                      <p className="memory-core__title">{m.title}</p>
+                    )}
                     <p className="memory-core__content">{m.content}</p>
                     <div className="memory-core__item-actions">
                       <button

@@ -55,13 +55,15 @@ export default function CharProfile({ onBack }: { onBack: () => void }) {
   }
 
   async function handleSave(draft: CharacterDraft) {
-    const { autoSummary, ...charFields } = draft
+    const { autoSummary, memoryMaxSummaryLength, ...charFields } = draft
     const id = editing?.id ?? createId()
+    const characterSettings = { memoryMaxSummaryLength }
     const character: Character = editing
-      ? { ...editing, ...charFields }
+      ? { ...editing, ...charFields, characterSettings }
       : {
           id,
           ...charFields,
+          characterSettings,
           online: true,
           createdAt: Date.now(),
         }

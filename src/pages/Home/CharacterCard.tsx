@@ -1,7 +1,5 @@
-import { useEffect, useState } from 'react'
 import { ChevronRight } from 'lucide-react'
-import type { Character, HeartVoice } from '../../types'
-import { getAll } from '../../services/storage'
+import type { Character } from '../../types'
 
 interface CharacterCardProps {
   character: Character | null
@@ -9,18 +7,6 @@ interface CharacterCardProps {
 }
 
 export default function CharacterCard({ character, onClick }: CharacterCardProps) {
-  const [latestVoice, setLatestVoice] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (!character) return
-    getAll<HeartVoice>('heartVoices').then((voices) => {
-      const sorted = voices
-        .filter((v) => v.characterId === character.id)
-        .sort((a, b) => b.createdAt - a.createdAt)
-      setLatestVoice(sorted[0]?.content ?? null)
-    })
-  }, [character?.id])
-
   const initial = character?.name.slice(0, 1) ?? '?'
 
   return (
@@ -40,18 +26,12 @@ export default function CharacterCard({ character, onClick }: CharacterCardProps
           </div>
           <div className="char-card__status">
             {character
-              ? `${character.online ? '在线' : '离线'}${character.persona ? ` · ${character.persona.slice(0, 8)}` : ''}`
-              : '添加角色开始聊天'}
+              ? (character.online ? '在线' : '离线')
+              : '点击创建你的第一个角色'}
           </div>
         </div>
         <ChevronRight size={16} strokeWidth={1.5} className="char-card__chevron" />
       </div>
-      {latestVoice && (
-        <div className="char-card__voice">
-          <span className="char-card__voice-accent" />
-          <span className="char-card__voice-text">「{latestVoice}」</span>
-        </div>
-      )}
     </div>
   )
 }

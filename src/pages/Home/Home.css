@@ -417,3 +417,9 @@
   color: var(--text-light);
   flex-shrink: 0;
 }
+
+.recent-list__empty {
+  padding: 12px 0;
+  font-size: 13px;
+  color: var(--text-light);
+}

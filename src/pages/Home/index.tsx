@@ -50,10 +50,10 @@ export default function Home({ onOpenChat }: HomeProps) {
         <div className="home__greeting-date">{dateStr}</div>
       </div>
       <CharacterCard character={activeCharacter} onClick={handleCharacterClick} />
-      <AboutUsCard />
-      <EmotionHeatmap now={now} />
+      <AboutUsCard character={activeCharacter} />
+      <EmotionHeatmap now={now} character={activeCharacter} />
       <AppGrid onOpenChat={onOpenChat} />
-      <RecentList />
+      <RecentList character={activeCharacter} onOpenMemory={() => onOpenChat('memoryCore')} />
     </div>
   )
 }

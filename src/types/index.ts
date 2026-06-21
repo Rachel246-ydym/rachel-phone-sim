@@ -67,6 +67,7 @@ export interface Character {
   heartVoiceMode?: 'topbar' | 'notification'
   autoBehavior?: AutoBehaviorSettings
   actionDescEnabled?: boolean
+  characterSettings?: CharacterSettings
 }
 
 export interface Message {
@@ -114,10 +115,16 @@ export interface Archive {
   createdAt: number
 }
 
+export interface CharacterSettings {
+  memoryMaxSummaryLength: number
+}
+
 export interface Memory {
   id: string
   characterId: string
   content: string
+  title?: string
+  pinned?: boolean
   tag: MemoryTag
   source: string
   branchId?: string
