@@ -8,25 +8,31 @@ export type ChatView = 'room' | 'story' | 'charProfile' | 'memoryCore'
 
 interface ChatModuleProps {
   initialView?: ChatView
+  onViewChange?: (view: ChatView) => void
 }
 
-export default function ChatModule({ initialView = 'room' }: ChatModuleProps) {
+export default function ChatModule({ initialView = 'room', onViewChange }: ChatModuleProps) {
   const [view, setView] = useState<ChatView>(initialView)
+
+  function changeView(next: ChatView) {
+    setView(next)
+    onViewChange?.(next)
+  }
 
   switch (view) {
     case 'room':
       return (
         <ChatRoom
-          onOpenStory={() => setView('story')}
-          onOpenMemory={() => setView('memoryCore')}
-          onOpenCharProfile={() => setView('charProfile')}
+          onOpenStory={() => changeView('story')}
+          onOpenMemory={() => changeView('memoryCore')}
+          onOpenCharProfile={() => changeView('charProfile')}
         />
       )
     case 'story':
-      return <StoryMode onBack={() => setView('room')} />
+      return <StoryMode onBack={() => changeView('room')} />
     case 'charProfile':
-      return <CharProfile onBack={() => setView('room')} />
+      return <CharProfile onBack={() => changeView('room')} />
     case 'memoryCore':
-      return <MemoryCore onBack={() => setView('room')} />
+      return <MemoryCore onBack={() => changeView('room')} />
   }
 }

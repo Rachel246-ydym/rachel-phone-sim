@@ -14,6 +14,7 @@ type AppTab = 'home' | 'chat' | 'profile'
 export default function App() {
   const [tab, setTab] = useState<AppTab>('home')
   const [chatInitView, setChatInitView] = useState<ChatView>('room')
+  const [chatView, setChatView] = useState<ChatView>('room')
   const dispatch = useAppDispatch()
   useAutoScheduler()
 
@@ -22,8 +23,11 @@ export default function App() {
       dispatch({ type: 'chat/setActiveCharacter', characterId })
     }
     setChatInitView(view)
+    setChatView(view)
     setTab('chat')
   }
+
+  const hideChrome = tab === 'chat' && chatView === 'story'
 
   const navActive: TabId =
     tab === 'profile' ? 'profile'
@@ -48,11 +52,16 @@ export default function App() {
       <StatusBar />
       <main className="phone__screen">
         {tab === 'home' && <HomeModule onOpenChat={openChat} />}
-        {tab === 'chat' && <ChatModule initialView={chatInitView} />}
+        {tab === 'chat' && (
+          <ChatModule
+            initialView={chatInitView}
+            onViewChange={(v) => setChatView(v)}
+          />
+        )}
         {tab === 'profile' && <ProfileModule />}
       </main>
-      <ThemeToggle />
-      <Navigation active={navActive} onChange={handleNavChange} />
+      {!hideChrome && <ThemeToggle />}
+      {!hideChrome && <Navigation active={navActive} onChange={handleNavChange} />}
     </div>
   )
 }

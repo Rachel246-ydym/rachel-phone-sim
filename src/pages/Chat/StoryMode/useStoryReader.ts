@@ -129,7 +129,7 @@ export function useStoryReader(
     const newStory: Story = {
       id: newStoryId,
       characterId: character.id,
-      title: isIfLine ? 'IF线' : `${character.name}的故事`,
+      title: isIfLine ? 'IF线' : '未命名故事',
       activeBranchId: branch.id,
       createdAt: now,
       updatedAt: now,
@@ -456,6 +456,14 @@ export function useStoryReader(
     }
   }
 
+  async function renameStory(title: string) {
+    const current = storyRef.current
+    if (!current || !title.trim()) return
+    const updated: Story = { ...current, title: title.trim() }
+    await put('stories', updated)
+    setStory(updated)
+  }
+
   async function restoreArchive(archive: Archive): Promise<string | null> {
     if (!storyRef.current || busyRef.current) return '正在生成中，暂时无法加载存档'
     if (!branches.some((b) => b.id === archive.branchId)) return '该存档所属的分支已被删除，无法加载'
@@ -482,6 +490,6 @@ export function useStoryReader(
     busy: streamingText !== null,
     send, continueStory, expand, regenerate, editSegment, deleteSegment, restoreSegment,
     togglePinParagraph, switchBranch, createBranch, createIfLineFromSegment,
-    renameBranch, deleteBranch, restoreArchive,
+    renameBranch, deleteBranch, restoreArchive, renameStory,
   }
 }

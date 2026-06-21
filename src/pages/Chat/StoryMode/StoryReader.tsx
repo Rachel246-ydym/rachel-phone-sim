@@ -36,8 +36,11 @@ export default function StoryReader({
   const [input, setInput] = useState('')
   const [menuTarget, setMenuTarget] = useState<Message | null>(null)
   const [undoStack, setUndoStack] = useState<UndoItem[]>([])
+  const [editingTitle, setEditingTitle] = useState(false)
+  const [titleValue, setTitleValue] = useState('')
   const pressTimer = useRef<number | null>(null)
   const endRef = useRef<HTMLDivElement>(null)
+  const titleSaveTimer = useRef<number | null>(null)
 
   const activeStoryId =
     activeTab === 'if' && selectedIfLineId ? selectedIfLineId : mainStoryId
@@ -100,6 +103,28 @@ export default function StoryReader({
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit() }
   }
 
+  function startTitleEdit() {
+    const currentTitle = isIfLine
+      ? (storyHook.story?.title ?? 'IF线')
+      : (storyHook.story?.title ?? '未命名故事')
+    setTitleValue(currentTitle)
+    setEditingTitle(true)
+  }
+
+  function confirmTitleEdit() {
+    setEditingTitle(false)
+    const trimmed = titleValue.trim()
+    if (!trimmed) return
+    if (titleSaveTimer.current !== null) window.clearTimeout(titleSaveTimer.current)
+    titleSaveTimer.current = window.setTimeout(() => {
+      void storyHook.renameStory(trimmed)
+    }, 300)
+  }
+
+  function handleTitleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter') e.currentTarget.blur()
+  }
+
   const theme = settings.longNarrative.theme
   const themeVars = THEME_VARS[theme] as React.CSSProperties
 
@@ -155,9 +180,23 @@ export default function StoryReader({
           <span className="story-reader__mode-label">
             线下模式{isIfLine && <span className="story-reader__if-badge">IF</span>}
           </span>
-          <span className="story-reader__char-name">
-            {isIfLine ? (ifLineTitle ?? 'IF线') : (storyHook.story?.title ?? character.name)}
-          </span>
+          {editingTitle ? (
+            <input
+              className="story-reader__title-input"
+              value={titleValue}
+              autoFocus
+              onChange={(e) => setTitleValue(e.target.value)}
+              onBlur={confirmTitleEdit}
+              onKeyDown={handleTitleKeyDown}
+            />
+          ) : (
+            <span
+              className="story-reader__char-name story-reader__char-name--editable"
+              onClick={startTitleEdit}
+            >
+              {isIfLine ? (ifLineTitle ?? 'IF线') : (storyHook.story?.title ?? '未命名故事')}
+            </span>
+          )}
         </div>
         {isWritingVisible && (
           <button
@@ -336,39 +375,60 @@ export default function StoryReader({
             className="story-reader__input"
             value={input}
             rows={1}
-            placeholder={writeMode === 'long' ? '描述情节梗概或你的行动…' : '描述你的动作或对话…'}
+            placeholder="说什么或做什么…"
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
           />
           {writeMode === 'long' ? (
-            <div className="story-reader__buttons">
-              <button
-                className="story-reader__expand-btn"
-                disabled={storyHook.busy || !input.trim()}
-                onClick={() => { void storyHook.expand(input); setInput('') }}
-              >
-                扩写
-              </button>
-              <button
-                className="story-reader__send-smart"
-                disabled={storyHook.busy}
-                onClick={() => {
-                  if (input.trim()) submit()
-                  else void storyHook.continueStory('long')
-                }}
-              >
-                {input.trim() ? '发送' : '续写'}
-              </button>
-            </div>
+            <>
+              {/* Primary: send or continue story */}
+              <div className="story-reader__btn-wrap">
+                <button
+                  className="story-reader__btn-primary"
+                  disabled={storyHook.busy}
+                  onClick={() => {
+                    if (input.trim()) submit()
+                    else void storyHook.continueStory('long')
+                  }}
+                >
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                    <path d="M9 14V4M4 9l5-5 5 5" stroke="currentColor" strokeWidth="1.5"
+                      strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+                <span className="story-reader__btn-label">
+                  {input.trim() ? '发送互动' : '续写'}
+                </span>
+              </div>
+              {/* Secondary: expand */}
+              <div className="story-reader__btn-wrap">
+                <button
+                  className="story-reader__btn-secondary"
+                  disabled={storyHook.busy || !input.trim()}
+                  onClick={() => { void storyHook.expand(input); setInput('') }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M13 1H3a1 1 0 00-1 1v8a1 1 0 001 1h2v3l3-3h5a1 1 0 001-1V2a1 1 0 00-1-1z"
+                      stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+                  </svg>
+                </button>
+                <span className="story-reader__btn-label">扩写</span>
+              </div>
+            </>
           ) : (
-            <div className="story-reader__buttons">
+            /* Short mode: send only */
+            <div className="story-reader__btn-wrap">
               <button
-                className="story-reader__send-smart"
+                className="story-reader__btn-primary"
                 disabled={storyHook.busy || !input.trim()}
                 onClick={submit}
               >
-                发送
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <path d="M9 14V4M4 9l5-5 5 5" stroke="currentColor" strokeWidth="1.5"
+                    strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               </button>
+              <span className="story-reader__btn-label">发送互动</span>
             </div>
           )}
         </div>

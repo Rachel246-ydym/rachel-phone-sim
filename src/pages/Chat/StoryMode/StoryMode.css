@@ -61,7 +61,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #FAF7F2;
+  background: var(--bg-screen);
 }
 
 /* Topbar */
@@ -108,6 +108,23 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.story-reader__char-name--editable {
+  cursor: text;
+}
+
+.story-reader__title-input {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--color-primary);
+  outline: none;
+  width: 100%;
+  padding: 0;
+  font-family: inherit;
 }
 
 .story-reader__archive-btn {
@@ -265,24 +282,24 @@
 /* Input bar */
 .story-reader__input-bar {
   flex-shrink: 0;
-  padding: 10px 16px 14px;
+  padding: 8px 14px 12px;
   border-top: 1px solid var(--border);
   background: var(--glass-bg);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   display: flex;
-  flex-direction: column;
+  align-items: flex-start;
   gap: 8px;
 }
 
 .story-reader__input {
-  width: 100%;
+  flex: 1;
   font: inherit;
   font-size: 13px;
   color: var(--text-primary);
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 18px;
   padding: 10px 14px;
   outline: none;
   resize: none;
@@ -298,44 +315,68 @@
   border-color: var(--color-primary-light);
 }
 
-.story-reader__buttons {
+/* Icon button wrapper (button + label below) */
+.story-reader__btn-wrap {
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  padding-top: 2px;
 }
 
-.story-reader__send-interact {
-  flex: 1;
-  padding: 10px;
-  border: 1px solid var(--border);
-  background: var(--bg-card);
-  color: var(--color-primary);
-  font-size: 13px;
-  font-weight: 600;
-  border-radius: 14px;
+.story-reader__btn-label {
+  font-size: 10px;
+  color: var(--text-light);
+  white-space: nowrap;
 }
 
-.story-reader__send-interact:active:not(:disabled) {
-  transform: scale(0.97);
+/* Primary circle button */
+.story-reader__btn-primary {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--text-primary);
+  color: var(--bg-screen);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: opacity 0.15s, transform 0.1s;
 }
 
-.story-reader__send-continue {
-  flex: 1;
-  padding: 10px;
-  background: var(--color-primary);
-  color: #fff;
-  font-size: 13px;
-  font-weight: 600;
-  border-radius: 14px;
-}
-
-.story-reader__send-continue:active:not(:disabled) {
-  transform: scale(0.97);
-}
-
-.story-reader__send-interact:disabled,
-.story-reader__send-continue:disabled {
-  opacity: 0.5;
+.story-reader__btn-primary:disabled {
+  opacity: 0.4;
   cursor: not-allowed;
+}
+
+.story-reader__btn-primary:active:not(:disabled) {
+  transform: scale(0.93);
+}
+
+/* Secondary circle button */
+.story-reader__btn-secondary {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: opacity 0.15s, transform 0.1s;
+  margin-top: 4px;
+}
+
+.story-reader__btn-secondary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.story-reader__btn-secondary:active:not(:disabled) {
+  transform: scale(0.93);
 }
 
 /* ===== 分支切换器 ===== */
