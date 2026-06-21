@@ -94,6 +94,9 @@ export interface Story {
   activeBranchId: string
   createdAt: number
   updatedAt: number
+  storyType?: 'main' | 'if'
+  pinned?: boolean
+  pinnedParagraphIds?: string[]
 }
 
 export interface StoryBranch {

@@ -1,26 +1,48 @@
-import { useState } from 'react'
-import SubPage from '../../../components/SubPage'
+import { useEffect, useState } from 'react'
+import { getAll } from '../../../services/storage'
 import { useAppState } from '../../../store/AppContext'
-import StoryList from './StoryList'
 import StoryReader from './StoryReader'
+import type { Story } from '../../../types'
 import './StoryMode.css'
 
-// 线下剧情模式入口：故事列表 ⇄ 故事阅读/互动页
 export default function StoryMode({ onBack }: { onBack: () => void }) {
   const { characters, activeCharacterId } = useAppState()
-  const [storyId, setStoryId] = useState<string | null>(null)
   const character = characters.find((c) => c.id === activeCharacterId) ?? null
+  // undefined = loading, null = no story, string = story id
+  const [mainStoryId, setMainStoryId] = useState<string | null | undefined>(undefined)
+
+  useEffect(() => {
+    if (!character) return
+    void getAll<Story>('stories').then((all) => {
+      const main = all.find(
+        (s) => s.characterId === character.id && (s.storyType === 'main' || !s.storyType),
+      )
+      setMainStoryId(main?.id ?? null)
+    })
+  }, [character?.id])
 
   if (!character) {
     return (
-      <SubPage title="线下剧情" onBack={onBack}>
+      <div className="story-reader">
         <p className="story-mode__missing">未选择角色，请先从聊天列表进入角色</p>
-      </SubPage>
+      </div>
     )
   }
 
-  if (storyId) {
-    return <StoryReader character={character} storyId={storyId} onBack={() => setStoryId(null)} />
+  if (mainStoryId === undefined) {
+    return (
+      <div className="story-reader">
+        <p className="story-mode__missing">加载中…</p>
+      </div>
+    )
   }
-  return <StoryList character={character} onBack={onBack} onOpen={setStoryId} />
+
+  return (
+    <StoryReader
+      character={character}
+      mainStoryId={mainStoryId}
+      onMainStoryCreated={setMainStoryId}
+      onBack={onBack}
+    />
+  )
 }

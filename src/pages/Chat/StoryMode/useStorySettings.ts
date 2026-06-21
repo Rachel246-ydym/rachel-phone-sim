@@ -2,27 +2,54 @@ import { useEffect, useState } from 'react'
 import { get, put } from '../../../services/storage'
 import type { NarrativePerson, StoryTheme } from '../../../types'
 
-export interface StorySettingsData {
+export interface LongNarrativeSettings {
   theme: StoryTheme
   useCharMemory: boolean
   styleGuide: string
   targetWords: number
   autoSummaryEvery: number
   narrativePerson: NarrativePerson
+  contextLimit: number
+  streamOutput: boolean
+}
+
+export interface ShortRPSettings {
+  useCharMemory: boolean
+  replyWordLimit: number
+  contextLimit: number
+  streamOutput: boolean
+}
+
+export interface StorySettingsData {
+  longNarrative: LongNarrativeSettings
+  shortRP: ShortRPSettings
 }
 
 const SETTINGS_KEY = 'story_settings'
 
-const DEFAULT_SETTINGS: StorySettingsData = {
+const DEFAULT_LONG: LongNarrativeSettings = {
   theme: 'dark',
   useCharMemory: false,
   styleGuide: '',
   targetWords: 2000,
   autoSummaryEvery: 5,
   narrativePerson: 'third',
+  contextLimit: 10,
+  streamOutput: true,
 }
 
-// CSS variable overrides for each theme; dark uses root defaults (empty)
+const DEFAULT_SHORT: ShortRPSettings = {
+  useCharMemory: false,
+  replyWordLimit: 100,
+  contextLimit: 10,
+  streamOutput: true,
+}
+
+export const DEFAULT_SETTINGS: StorySettingsData = {
+  longNarrative: DEFAULT_LONG,
+  shortRP: DEFAULT_SHORT,
+}
+
 export const THEME_VARS: Record<StoryTheme, Record<string, string>> = {
   dark: {},
   light: {
@@ -51,13 +78,38 @@ export const THEME_VARS: Record<StoryTheme, Record<string, string>> = {
   },
 }
 
+function migrate(raw: unknown): StorySettingsData {
+  if (!raw || typeof raw !== 'object') return DEFAULT_SETTINGS
+  const r = raw as Record<string, unknown>
+  if (r.longNarrative && r.shortRP) {
+    return {
+      longNarrative: { ...DEFAULT_LONG, ...(r.longNarrative as Partial<LongNarrativeSettings>) },
+      shortRP: { ...DEFAULT_SHORT, ...(r.shortRP as Partial<ShortRPSettings>) },
+    }
+  }
+  // Migrate from old flat format
+  return {
+    longNarrative: {
+      theme: (r.theme as StoryTheme) ?? DEFAULT_LONG.theme,
+      useCharMemory: (r.useCharMemory as boolean) ?? DEFAULT_LONG.useCharMemory,
+      styleGuide: (r.styleGuide as string) ?? DEFAULT_LONG.styleGuide,
+      targetWords: (r.targetWords as number) ?? DEFAULT_LONG.targetWords,
+      autoSummaryEvery: (r.autoSummaryEvery as number) ?? DEFAULT_LONG.autoSummaryEvery,
+      narrativePerson: (r.narrativePerson as NarrativePerson) ?? DEFAULT_LONG.narrativePerson,
+      contextLimit: DEFAULT_LONG.contextLimit,
+      streamOutput: DEFAULT_LONG.streamOutput,
+    },
+    shortRP: DEFAULT_SHORT,
+  }
+}
+
 export function useStorySettings() {
   const [settings, setSettings] = useState<StorySettingsData>(DEFAULT_SETTINGS)
 
   useEffect(() => {
     void (async () => {
-      const entry = await get<{ id: string; value: StorySettingsData }>('settings', SETTINGS_KEY)
-      if (entry) setSettings(entry.value)
+      const entry = await get<{ id: string; value: unknown }>('settings', SETTINGS_KEY)
+      if (entry) setSettings(migrate(entry.value))
     })()
   }, [])
 
