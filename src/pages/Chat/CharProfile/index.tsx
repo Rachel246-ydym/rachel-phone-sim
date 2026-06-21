@@ -106,17 +106,16 @@ export default function CharProfile({ onBack }: { onBack: () => void }) {
 
   if (view === 'form') {
     return (
-      <SubPage title={editing ? '编辑角色' : '新建角色'} onBack={() => setView('list')}>
-        <CharacterForm
-          initial={editing}
-          branches={branches}
-          onSave={handleSave}
-          onDelete={editing ? handleDelete : undefined}
-          onClearMessages={editing ? handleClearMessages : undefined}
-          onViewHeartVoices={editing ? () => setView('heartVoiceList') : undefined}
-          onViewMemory={editing ? openMemory : undefined}
-        />
-      </SubPage>
+      <CharacterForm
+        initial={editing}
+        branches={branches}
+        onBack={() => setView('list')}
+        onSave={handleSave}
+        onDelete={editing ? handleDelete : undefined}
+        onClearMessages={editing ? handleClearMessages : undefined}
+        onViewHeartVoices={editing ? () => setView('heartVoiceList') : undefined}
+        onViewMemory={editing ? openMemory : undefined}
+      />
     )
   }
 

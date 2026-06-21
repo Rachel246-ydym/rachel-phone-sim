@@ -12,6 +12,8 @@ export type ThemeMode = 'light' | 'dark'
 
 export type ReplyMode = 'manual' | 'auto-interruptible' | 'auto-uninterruptible'
 
+export type Relationship = 'lover' | 'friend' | 'family'
+
 export type MemoryTag =
   | 'auto-summary'
   | 'manual-summary'
@@ -56,6 +58,8 @@ export interface Character {
   nickname: string
   avatar: string | null
   persona: string
+  speakingStyle?: string
+  relationship?: Relationship
   online: boolean
   modelParams: ModelParams
   createdAt: number
