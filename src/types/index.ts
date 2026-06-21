@@ -68,6 +68,7 @@ export interface Character {
   autoBehavior?: AutoBehaviorSettings
   actionDescEnabled?: boolean
   characterSettings?: CharacterSettings
+  customChatPrompt?: string
 }
 
 export interface Message {

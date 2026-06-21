@@ -3,38 +3,46 @@ import { useAppState } from '../../../store/AppContext'
 import { createId, get, getAll, put, remove } from '../../../services/storage'
 import { chatCompletion, chatCompletionStream, type AiMessage } from '../../../services/ai'
 import { buildMemoryContext } from '../../../services/memory'
+import { CHAT_SYSTEM_PROMPT, NARRATIVE_SYSTEM_PROMPT } from '../../../constants/builtInPrompts'
 import type { Archive, Character, Message, Story, StoryBranch } from '../../../types'
 import type { StorySettingsData } from './useStorySettings'
 
 const PERSON_LABEL: Record<string, string> = {
-  first: '第一人称（以"我"视角叙述）',
-  third: '第三人称（以"他/她"视角叙述）',
-  mixed: '混合视角（灵活切换叙事人称）',
+  first: '第一人称',
+  third: '第三人称',
+  mixed: '混合视角',
 }
 
-function buildLongPrompt(character: Character, settings: StorySettingsData): string {
+function buildLongPrompt(character: Character, settings: StorySettingsData, memoryContext: string): string {
   const ln = settings.longNarrative
   return [
-    `你是一位小说叙事者，正在创作「${character.name}」与用户共同经历的线下剧情。`,
+    NARRATIVE_SYSTEM_PROMPT,
+    '【角色设定】',
+    `你正在创作「${character.name}」与用户共同经历的线下剧情。`,
     character.nickname ? `故事中的用户即「${character.nickname}」。` : '',
-    `角色设定：${character.persona}`,
+    character.persona,
+    character.speakingStyle ? `【说话风格】\n${character.speakingStyle}` : '',
+    '【剧情设定】',
     `叙事人称：${PERSON_LABEL[ln.narrativePerson] ?? '第三人称'}`,
-    `每段目标字数：约 ${ln.targetWords} 字`,
-    ln.styleGuide ? `文风要求：${ln.styleGuide}` : '',
-    '用户每次输入自己的行为或对话，你据此生成下一段大段连贯的叙事文本，包含场景、动作、心理与对话描写。',
-    '每次只推进一段剧情，在适合用户介入的节点收尾，不要替用户做决定或代写用户的台词。',
+    ln.styleGuide ? `文风：${ln.styleGuide}` : '',
+    `目标字数：约${ln.targetWords}字`,
+    memoryContext,
+    ln.customPrompt ? `【用户自定义指令】\n${ln.customPrompt}` : '',
   ].filter(Boolean).join('\n')
 }
 
-function buildShortPrompt(character: Character, settings: StorySettingsData): string {
+function buildShortPrompt(character: Character, settings: StorySettingsData, memoryContext: string): string {
   const sr = settings.shortRP
   return [
-    `你是角色「${character.name}」，正在和用户进行线下互动剧情。`,
+    CHAT_SYSTEM_PROMPT,
+    `【回复要求】每次回复不超过${sr.replyWordLimit}字，以角色的动作和简短对话回应。`,
+    '【角色设定】',
+    `你正在扮演「${character.name}」，正在和用户进行线下互动剧情。`,
     character.nickname ? `用户的名字是「${character.nickname}」。` : '',
-    `角色设定：${character.persona}`,
-    character.speakingStyle ? `说话风格：${character.speakingStyle}` : '',
-    `请根据用户的行为描写，以${character.name}的身份作出简短真实的反应。`,
-    `每次回复不超过${sr.replyWordLimit}字，不要代写用户的动作。`,
+    character.persona,
+    character.speakingStyle ? `【说话风格】\n${character.speakingStyle}` : '',
+    memoryContext,
+    sr.customPrompt ? `【用户自定义指令】\n${sr.customPrompt}` : '',
   ].filter(Boolean).join('\n')
 }
 
@@ -143,13 +151,13 @@ export function useStoryReader(
     if (!apiConfig) throw new Error('请先在「我的」→ API 设置中添加 API 配置')
     const isShort = mode === 'short'
     const sett = isShort ? settings.shortRP : settings.longNarrative
-    let systemContent = isShort
-      ? buildShortPrompt(character, settings)
-      : buildLongPrompt(character, settings)
+    let memoryContext = ''
     if (!isIfLine && sett.useCharMemory) {
-      const memCount = character.modelParams.memoryCount ?? 20
-      systemContent += await buildMemoryContext(character.id, memCount)
+      memoryContext = await buildMemoryContext(character.id, character.modelParams.memoryCount ?? 20)
     }
+    const systemContent = isShort
+      ? buildShortPrompt(character, settings, memoryContext)
+      : buildLongPrompt(character, settings, memoryContext)
     const limited = limitHistory(history, sett.contextLimit)
     const aiMessages: AiMessage[] = [
       { role: 'system', content: systemContent },
@@ -254,10 +262,11 @@ export function useStoryReader(
       }
       if (!apiConfig) throw new Error('请先在「我的」→ API 设置中添加 API 配置')
       const ln = settings.longNarrative
-      let systemContent = buildLongPrompt(character, settings)
+      let memoryContext = ''
       if (!isIfLine && ln.useCharMemory) {
-        systemContent += await buildMemoryContext(character.id, character.modelParams.memoryCount ?? 20)
+        memoryContext = await buildMemoryContext(character.id, character.modelParams.memoryCount ?? 20)
       }
+      const systemContent = buildLongPrompt(character, settings, memoryContext)
       const aiMessages: AiMessage[] = [
         { role: 'system', content: systemContent },
         ...limitHistory(messages, ln.contextLimit).map((m) => ({ role: m.role, content: m.content })),

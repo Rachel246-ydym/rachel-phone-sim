@@ -169,6 +169,17 @@ export default function StorySettings({ initial, onBack, onSave }: StorySettings
                 />
               </div>
             </section>
+
+            <section className="story-settings__section">
+              <h2 className="story-settings__section-title">自定义指令（可选）</h2>
+              <textarea
+                className="story-settings__textarea"
+                rows={3}
+                placeholder="可选。添加额外的叙事规则或文风要求…"
+                value={longForm.customPrompt ?? ''}
+                onChange={(e) => setLong('customPrompt', e.target.value)}
+              />
+            </section>
           </>
         )}
 
@@ -218,6 +229,17 @@ export default function StorySettings({ initial, onBack, onSave }: StorySettings
                   onChange={(e) => setShort('contextLimit', Number(e.target.value))}
                 />
               </div>
+            </section>
+
+            <section className="story-settings__section">
+              <h2 className="story-settings__section-title">自定义指令（可选）</h2>
+              <textarea
+                className="story-settings__textarea"
+                rows={3}
+                placeholder="可选。添加额外的对话规则或要求…"
+                value={shortForm.customPrompt ?? ''}
+                onChange={(e) => setShort('customPrompt', e.target.value)}
+              />
             </section>
           </>
         )}

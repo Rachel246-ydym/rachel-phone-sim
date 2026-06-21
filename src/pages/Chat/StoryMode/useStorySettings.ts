@@ -11,6 +11,7 @@ export interface LongNarrativeSettings {
   narrativePerson: NarrativePerson
   contextLimit: number
   streamOutput: boolean
+  customPrompt: string
 }
 
 export interface ShortRPSettings {
@@ -18,6 +19,7 @@ export interface ShortRPSettings {
   replyWordLimit: number
   contextLimit: number
   streamOutput: boolean
+  customPrompt: string
 }
 
 export interface StorySettingsData {
@@ -36,6 +38,7 @@ const DEFAULT_LONG: LongNarrativeSettings = {
   narrativePerson: 'third',
   contextLimit: 10,
   streamOutput: true,
+  customPrompt: '',
 }
 
 const DEFAULT_SHORT: ShortRPSettings = {
@@ -43,6 +46,7 @@ const DEFAULT_SHORT: ShortRPSettings = {
   replyWordLimit: 100,
   contextLimit: 10,
   streamOutput: true,
+  customPrompt: '',
 }
 
 export const DEFAULT_SETTINGS: StorySettingsData = {
@@ -98,6 +102,7 @@ function migrate(raw: unknown): StorySettingsData {
       narrativePerson: (r.narrativePerson as NarrativePerson) ?? DEFAULT_LONG.narrativePerson,
       contextLimit: DEFAULT_LONG.contextLimit,
       streamOutput: DEFAULT_LONG.streamOutput,
+      customPrompt: '',
     },
     shortRP: DEFAULT_SHORT,
   }

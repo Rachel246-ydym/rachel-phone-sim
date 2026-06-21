@@ -3,19 +3,20 @@ import { useAppDispatch, useAppState } from '../../../store/AppContext'
 import { createId, get, getAll, put } from '../../../services/storage'
 import { chatCompletion, chatCompletionStream, getConfigForFeature, type AiMessage } from '../../../services/ai'
 import { addMemory, buildMemoryContext } from '../../../services/memory'
+import { CHAT_SYSTEM_PROMPT } from '../../../constants/builtInPrompts'
 import type { ApiConfig, Character, Message } from '../../../types'
 
 function buildSystemPrompt(character: Character, memoryContext: string): string {
-  return (
-    [
-      `你正在扮演「${character.name}」，通过手机和用户聊天。`,
-      character.nickname ? `你称呼用户为「${character.nickname}」。` : '',
-      '动作描写用 * 包裹（如 *他低头笑了笑*），区别于对话文本。',
-      character.persona,
-    ]
-      .filter(Boolean)
-      .join('\n') + memoryContext
-  )
+  return [
+    CHAT_SYSTEM_PROMPT,
+    '【角色设定】',
+    `你正在扮演「${character.name}」，通过手机和用户聊天。`,
+    character.nickname ? `你称呼用户为「${character.nickname}」。` : '',
+    character.persona,
+    character.speakingStyle ? `【说话风格】\n${character.speakingStyle}` : '',
+    memoryContext,
+    character.customChatPrompt ? `【用户自定义指令】\n${character.customChatPrompt}` : '',
+  ].filter(Boolean).join('\n')
 }
 
 async function runAutoSummary(

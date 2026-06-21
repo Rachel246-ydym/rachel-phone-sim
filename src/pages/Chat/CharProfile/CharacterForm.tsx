@@ -14,6 +14,7 @@ export interface CharacterDraft {
   avatar: string | null
   persona: string
   speakingStyle: string
+  customChatPrompt: string
   relationship: Relationship
   heartVoiceEnabled: boolean
   heartVoiceMode: 'topbar' | 'notification'
@@ -76,6 +77,7 @@ export default function CharacterForm({
   const [avatar, setAvatar] = useState<string | null>(initial?.avatar ?? null)
   const [persona, setPersona] = useState(initial?.persona ?? '')
   const [speakingStyle, setSpeakingStyle] = useState(initial?.speakingStyle ?? '')
+  const [customChatPrompt, setCustomChatPrompt] = useState(initial?.customChatPrompt ?? '')
   const [hvEnabled, setHvEnabled] = useState(initial?.heartVoiceEnabled ?? false)
   const [hvMode, setHvMode] = useState<'topbar' | 'notification'>(initial?.heartVoiceMode ?? 'topbar')
   const [params, setParams] = useState<ModelParams>(initial?.modelParams ?? DEFAULT_MODEL_PARAMS)
@@ -114,6 +116,7 @@ export default function CharacterForm({
         avatar,
         persona: persona.trim(),
         speakingStyle: speakingStyle.trim(),
+        customChatPrompt: customChatPrompt.trim(),
         relationship,
         heartVoiceEnabled: hvEnabled,
         heartVoiceMode: hvMode,
@@ -202,6 +205,12 @@ export default function CharacterForm({
             <span className="cf2__field-label">回复风格描述</span>
             <textarea className="cf2__textarea" value={speakingStyle} onChange={(e) => setSpeakingStyle(e.target.value)}
               placeholder="如：温和、偶尔引用文学作品、会用省略号" style={{ minHeight: 80 }} />
+          </Section>
+
+          <Section title="自定义指令">
+            <span className="cf2__field-label">自定义指令（可选）</span>
+            <textarea className="cf2__textarea" value={customChatPrompt} onChange={(e) => setCustomChatPrompt(e.target.value)}
+              placeholder="可选。添加额外的对话规则或要求…" style={{ minHeight: 60 }} />
           </Section>
 
           <Section title="模型参数">
