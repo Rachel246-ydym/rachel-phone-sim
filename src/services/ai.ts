@@ -96,7 +96,7 @@ function buildRequestBody(
   })
 }
 
-async function postChat(config: ApiConfig, body: string): Promise<Response> {
+async function postChat(config: ApiConfig, body: string, signal?: AbortSignal): Promise<Response> {
   const url = `${config.url.replace(/\/$/, '')}/chat/completions`
   const response = await fetch(url, {
     method: 'POST',
@@ -105,6 +105,7 @@ async function postChat(config: ApiConfig, body: string): Promise<Response> {
       Authorization: `Bearer ${config.key}`,
     },
     body,
+    signal,
   })
   if (!response.ok) {
     const detail = await response.text().catch(() => '')
@@ -117,11 +118,12 @@ export async function chatCompletion(
   config: ApiConfig,
   messages: AiMessage[],
   params: ModelParams,
+  signal?: AbortSignal,
 ): Promise<string> {
   let success = false
   let tokens = 0
   try {
-    const response = await postChat(config, buildRequestBody(config, messages, params, false))
+    const response = await postChat(config, buildRequestBody(config, messages, params, false), signal)
     const data = (await response.json()) as ChatCompletionResponse
     tokens = data.usage?.total_tokens ?? 0
     success = true
@@ -136,11 +138,12 @@ export async function chatCompletionStream(
   messages: AiMessage[],
   params: ModelParams,
   onDelta: (text: string) => void,
+  signal?: AbortSignal,
 ): Promise<string> {
   let success = false
   let tokens = 0
   try {
-    const response = await postChat(config, buildRequestBody(config, messages, params, true))
+    const response = await postChat(config, buildRequestBody(config, messages, params, true), signal)
     if (!response.body) {
       throw new Error('当前环境不支持流式响应')
     }
@@ -151,6 +154,10 @@ export async function chatCompletionStream(
     let full = ''
 
     for (;;) {
+      if (signal?.aborted) {
+        await reader.cancel()
+        throw new DOMException('The user aborted a request.', 'AbortError')
+      }
       const { done, value } = await reader.read()
       if (done) break
       buffer += decoder.decode(value, { stream: true })

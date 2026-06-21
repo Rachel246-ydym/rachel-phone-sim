@@ -26,11 +26,7 @@ const INPUT_MAX_HEIGHT = 260
 
 function formatTime(ts: number): string {
   const d = new Date(ts)
-  const h = d.getHours()
-  const m = d.getMinutes()
-  const period = h < 12 ? '上午' : '下午'
-  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h
-  return `${period}${h12}:${String(m).padStart(2, '0')}`
+  return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0')
 }
 
 interface UndoItem { message: Message; position: number }
@@ -432,66 +428,81 @@ export default function StoryReader({
       {/* Input bar */}
       {isWritingVisible && (
         <div className="story-reader__input-bar">
-          <textarea
-            ref={inputRef}
-            className="story-reader__input"
-            value={input}
-            rows={1}
-            placeholder="说什么或做什么…"
-            onChange={(e) => { setInput(e.target.value); autoResize() }}
-            onKeyDown={handleKeyDown}
-          />
-          {writeMode === 'long' ? (
-            <>
-              {/* Primary: send or continue story */}
-              <div className="story-reader__btn-wrap">
-                <button
-                  className="story-reader__btn-primary"
-                  disabled={storyHook.busy}
-                  onClick={() => {
-                    if (input.trim()) submit()
-                    else void storyHook.continueStory('long')
-                  }}
-                >
-                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                    <path d="M9 14V4M4 9l5-5 5 5" stroke="currentColor" strokeWidth="1.5"
-                      strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </button>
-                <span className="story-reader__btn-label">
-                  {input.trim() ? '发送互动' : '续写'}
-                </span>
+          {storyHook.busy ? (
+            <div className="gen-status-bar">
+              <div className="gen-status-bar__dots">
+                <span className="gen-status-bar__dot" />
+                <span className="gen-status-bar__dot" />
+                <span className="gen-status-bar__dot" />
               </div>
-              {/* Secondary: expand */}
-              <div className="story-reader__btn-wrap">
-                <button
-                  className="story-reader__btn-secondary"
-                  disabled={storyHook.busy || !input.trim()}
-                  onClick={() => { void storyHook.expand(input); setInput('') }}
-                >
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M13 1H3a1 1 0 00-1 1v8a1 1 0 001 1h2v3l3-3h5a1 1 0 001-1V2a1 1 0 00-1-1z"
-                      stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-                  </svg>
-                </button>
-                <span className="story-reader__btn-label">扩写</span>
-              </div>
-            </>
-          ) : (
-            /* Short mode: send only */
-            <div className="story-reader__btn-wrap">
-              <button
-                className="story-reader__btn-primary"
-                disabled={storyHook.busy || !input.trim()}
-                onClick={submit}
-              >
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                  <path d="M9 14V4M4 9l5-5 5 5" stroke="currentColor" strokeWidth="1.5"
-                    strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+              <span className="gen-status-bar__text">正在生成剧情…</span>
+              <button className="gen-status-bar__stop" onClick={storyHook.stopGeneration}>
+                停止
               </button>
-              <span className="story-reader__btn-label">发送互动</span>
             </div>
+          ) : (
+            <>
+              <textarea
+                ref={inputRef}
+                className="story-reader__input"
+                value={input}
+                rows={1}
+                placeholder="说什么或做什么…"
+                onChange={(e) => { setInput(e.target.value); autoResize() }}
+                onKeyDown={handleKeyDown}
+              />
+              {writeMode === 'long' ? (
+                <>
+                  {/* Primary: send or continue story */}
+                  <div className="story-reader__btn-wrap">
+                    <button
+                      className="story-reader__btn-primary"
+                      onClick={() => {
+                        if (input.trim()) submit()
+                        else void storyHook.continueStory('long')
+                      }}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path d="M9 14V4M4 9l5-5 5 5" stroke="currentColor" strokeWidth="1.5"
+                          strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
+                    <span className="story-reader__btn-label">
+                      {input.trim() ? '发送互动' : '续写'}
+                    </span>
+                  </div>
+                  {/* Secondary: expand */}
+                  <div className="story-reader__btn-wrap">
+                    <button
+                      className="story-reader__btn-secondary"
+                      disabled={!input.trim()}
+                      onClick={() => { void storyHook.expand(input); setInput('') }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M13 1H3a1 1 0 00-1 1v8a1 1 0 001 1h2v3l3-3h5a1 1 0 001-1V2a1 1 0 00-1-1z"
+                          stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+                      </svg>
+                    </button>
+                    <span className="story-reader__btn-label">扩写</span>
+                  </div>
+                </>
+              ) : (
+                /* Short mode: send only */
+                <div className="story-reader__btn-wrap">
+                  <button
+                    className="story-reader__btn-primary"
+                    disabled={!input.trim()}
+                    onClick={submit}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                      <path d="M9 14V4M4 9l5-5 5 5" stroke="currentColor" strokeWidth="1.5"
+                        strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
+                  <span className="story-reader__btn-label">发送互动</span>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}

@@ -3,7 +3,7 @@ import './StatusBar.css'
 
 export default function StatusBar() {
   const now = useNow()
-  const time = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+  const time = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false })
 
   return (
     <header className="status-bar">

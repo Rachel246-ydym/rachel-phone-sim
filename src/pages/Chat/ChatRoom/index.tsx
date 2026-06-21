@@ -19,7 +19,7 @@ interface ChatRoomProps {
 export default function ChatRoom({ onOpenStory, onOpenMemory, onOpenCharProfile }: ChatRoomProps) {
   const { characters, activeCharacterId } = useAppState()
   const dispatch = useAppDispatch()
-  const { character, messages, streamingText, error, latestHeartVoice, send, sending } =
+  const { character, messages, streamingText, error, latestHeartVoice, send, sending, stopGeneration } =
     useChatRoom()
 
   const [searchOpen, setSearchOpen] = useState(false)
@@ -116,7 +116,19 @@ export default function ChatRoom({ onOpenStory, onOpenMemory, onOpenCharProfile 
             {latestHeartVoice}
           </div>
         )}
-        <InputBar disabled={sending} onSend={(text) => void send(text)} />
+        {sending ? (
+          <div className="chat-room__input-bar gen-status-bar">
+            <div className="gen-status-bar__dots">
+              <span className="gen-status-bar__dot" />
+              <span className="gen-status-bar__dot" />
+              <span className="gen-status-bar__dot" />
+            </div>
+            <span className="gen-status-bar__text">正在回复…</span>
+            <button className="gen-status-bar__stop" onClick={stopGeneration}>停止</button>
+          </div>
+        ) : (
+          <InputBar disabled={false} onSend={(text) => void send(text)} />
+        )}
       </div>
       <CharInfoPanel
         open={charInfoOpen}

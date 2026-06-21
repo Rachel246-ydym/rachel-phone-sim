@@ -89,6 +89,8 @@ export function useStoryReader(
   const [error, setError] = useState<string | null>(null)
   const busyRef = useRef(false)
   const storyRef = useRef<Story | null>(null)
+  const abortControllerRef = useRef<AbortController | null>(null)
+  const streamAccumRef = useRef<string>('')
   storyRef.current = story
 
   useEffect(() => {
@@ -169,9 +171,19 @@ export function useStoryReader(
       })),
     ]
     const params = character.modelParams
+
+    streamAccumRef.current = ''
+    const controller = new AbortController()
+    abortControllerRef.current = controller
+
+    const wrappedOnDelta = (delta: string) => {
+      streamAccumRef.current += delta
+      onDelta(delta)
+    }
+
     return sett.streamOutput
-      ? chatCompletionStream(apiConfig, aiMessages, params, onDelta)
-      : chatCompletion(apiConfig, aiMessages, params)
+      ? chatCompletionStream(apiConfig, aiMessages, params, wrappedOnDelta, controller.signal)
+      : chatCompletion(apiConfig, aiMessages, params, controller.signal)
   }
 
   async function touchStory(current: Story) {
@@ -181,13 +193,25 @@ export function useStoryReader(
     return updated
   }
 
+  function stopGeneration() {
+    abortControllerRef.current?.abort()
+  }
+
+  function isAbortError(err: unknown): boolean {
+    return err instanceof Error && err.name === 'AbortError'
+  }
+
   async function send(text: string, mode: 'long' | 'short') {
     const content = text.trim()
     if (!content || busyRef.current) return
     busyRef.current = true
     setError(null)
+
+    let current: Story | null = null
+    let history: Message[] = []
+
     try {
-      const current = await ensureStory()
+      current = await ensureStory()
       const userMessage: Message = {
         id: createId(),
         characterId: character.id,
@@ -198,7 +222,7 @@ export function useStoryReader(
         storyBranchId: current.activeBranchId,
       }
       await put('messages', userMessage)
-      const history = [...messages, userMessage]
+      history = [...messages, userMessage]
       setMessages(history)
       setStreamingText('')
       const reply = await generate(history, mode, (delta) =>
@@ -217,10 +241,32 @@ export function useStoryReader(
       setMessages([...history, segment])
       await touchStory(current)
     } catch (err) {
-      setError(err instanceof Error ? err.message : '生成失败，请稍后重试')
+      if (isAbortError(err)) {
+        const partial = streamAccumRef.current.trim()
+        if (partial && current) {
+          const segment: Message = {
+            id: createId(),
+            characterId: character.id,
+            role: 'assistant',
+            content: partial,
+            timestamp: Date.now(),
+            storyId: current.id,
+            storyBranchId: current.activeBranchId,
+          }
+          await put('messages', segment)
+          setMessages([...history, segment])
+          await touchStory(current)
+        } else {
+          setError('⚠ 生成失败: The user aborted a request.')
+          window.setTimeout(() => setError(null), 3000)
+        }
+      } else {
+        setError(err instanceof Error ? err.message : '生成失败，请稍后重试')
+      }
     } finally {
       setStreamingText(null)
       busyRef.current = false
+      abortControllerRef.current = null
     }
   }
 
@@ -228,8 +274,11 @@ export function useStoryReader(
     if (busyRef.current) return
     busyRef.current = true
     setError(null)
+
+    let current: Story | null = null
+
     try {
-      const current = await ensureStory()
+      current = await ensureStory()
       setStreamingText('')
       const reply = await generate(messages, mode, (delta) =>
         setStreamingText((prev) => (prev ?? '') + delta),
@@ -247,10 +296,32 @@ export function useStoryReader(
       setMessages((prev) => [...prev, segment])
       await touchStory(current)
     } catch (err) {
-      setError(err instanceof Error ? err.message : '生成失败，请稍后重试')
+      if (isAbortError(err)) {
+        const partial = streamAccumRef.current.trim()
+        if (partial && current) {
+          const segment: Message = {
+            id: createId(),
+            characterId: character.id,
+            role: 'assistant',
+            content: partial,
+            timestamp: Date.now(),
+            storyId: current.id,
+            storyBranchId: current.activeBranchId,
+          }
+          await put('messages', segment)
+          setMessages((prev) => [...prev, segment])
+          await touchStory(current)
+        } else {
+          setError('⚠ 生成失败: The user aborted a request.')
+          window.setTimeout(() => setError(null), 3000)
+        }
+      } else {
+        setError(err instanceof Error ? err.message : '生成失败，请稍后重试')
+      }
     } finally {
       setStreamingText(null)
       busyRef.current = false
+      abortControllerRef.current = null
     }
   }
 
@@ -259,8 +330,12 @@ export function useStoryReader(
     if (!content || busyRef.current) return
     busyRef.current = true
     setError(null)
+
+    let current: Story | null = null
+    let history: Message[] = []
+
     try {
-      const current = await ensureStory()
+      current = await ensureStory()
       const userExpandMessage: Message = {
         id: createId(),
         characterId: character.id,
@@ -272,7 +347,7 @@ export function useStoryReader(
         storyBranchId: current.activeBranchId,
       }
       await put('messages', userExpandMessage)
-      const history = [...messages, userExpandMessage]
+      history = [...messages, userExpandMessage]
       setMessages(history)
       setStreamingText('')
       const reply = await generate(history, 'long', (delta) =>
@@ -291,10 +366,32 @@ export function useStoryReader(
       setMessages([...history, segment])
       await touchStory(current)
     } catch (err) {
-      setError(err instanceof Error ? err.message : '扩写失败，请稍后重试')
+      if (isAbortError(err)) {
+        const partial = streamAccumRef.current.trim()
+        if (partial && current) {
+          const segment: Message = {
+            id: createId(),
+            characterId: character.id,
+            role: 'assistant',
+            content: partial,
+            timestamp: Date.now(),
+            storyId: current.id,
+            storyBranchId: current.activeBranchId,
+          }
+          await put('messages', segment)
+          setMessages([...history, segment])
+          await touchStory(current)
+        } else {
+          setError('⚠ 生成失败: The user aborted a request.')
+          window.setTimeout(() => setError(null), 3000)
+        }
+      } else {
+        setError(err instanceof Error ? err.message : '扩写失败，请稍后重试')
+      }
     } finally {
       setStreamingText(null)
       busyRef.current = false
+      abortControllerRef.current = null
     }
   }
 
@@ -315,11 +412,25 @@ export function useStoryReader(
       setMessages((prev) => prev.map((m) => (m.id === segmentId ? updated : m)))
       if (storyRef.current) await touchStory(storyRef.current)
     } catch (err) {
-      setError(err instanceof Error ? err.message : '重新生成失败，请稍后重试')
+      if (isAbortError(err)) {
+        const partial = streamAccumRef.current.trim()
+        if (partial) {
+          const updated: Message = { ...target, content: partial }
+          await put('messages', updated)
+          setMessages((prev) => prev.map((m) => (m.id === segmentId ? updated : m)))
+          if (storyRef.current) await touchStory(storyRef.current)
+        } else {
+          setError('⚠ 生成失败: The user aborted a request.')
+          window.setTimeout(() => setError(null), 3000)
+        }
+      } else {
+        setError(err instanceof Error ? err.message : '重新生成失败，请稍后重试')
+      }
     } finally {
       setStreamingText(null)
       setRegeneratingId(null)
       busyRef.current = false
+      abortControllerRef.current = null
     }
   }
 
@@ -491,6 +602,6 @@ export function useStoryReader(
     busy: streamingText !== null,
     send, continueStory, expand, regenerate, editSegment, deleteSegment, restoreSegment,
     togglePinParagraph, switchBranch, createBranch, createIfLineFromSegment,
-    renameBranch, deleteBranch, restoreArchive, renameStory,
+    renameBranch, deleteBranch, restoreArchive, renameStory, stopGeneration,
   }
 }

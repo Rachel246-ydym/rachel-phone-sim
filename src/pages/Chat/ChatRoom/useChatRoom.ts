@@ -119,6 +119,8 @@ export function useChatRoom() {
   const [error, setError] = useState<string | null>(null)
   const [latestHeartVoice, setLatestHeartVoice] = useState<string | null>(null)
   const sendingRef = useRef(false)
+  const abortControllerRef = useRef<AbortController | null>(null)
+  const streamAccumRef = useRef<string>('')
 
   const character = characters.find((c) => c.id === activeCharacterId) ?? null
   const apiConfig = apiConfigs.find((c) => c.isPrimary) ?? apiConfigs[0] ?? null
@@ -183,15 +185,19 @@ export function useChatRoom() {
 
       for (let i = 0; i < replyCount; i++) {
         setStreamingText('')
+        streamAccumRef.current = ''
+        const controller = new AbortController()
+        abortControllerRef.current = controller
         const aiMessages: AiMessage[] = [
           systemMsg,
           ...historyMessages.map((m) => ({ role: m.role, content: m.content })),
         ]
         const reply = params.stream
-          ? await chatCompletionStream(apiConfig, aiMessages, params, (delta) =>
-              setStreamingText((prev) => (prev ?? '') + delta),
-            )
-          : await chatCompletion(apiConfig, aiMessages, params)
+          ? await chatCompletionStream(apiConfig, aiMessages, params, (delta) => {
+              streamAccumRef.current += delta
+              setStreamingText((prev) => (prev ?? '') + delta)
+            }, controller.signal)
+          : await chatCompletion(apiConfig, aiMessages, params, controller.signal)
         lastReply = reply
         const assistantMessage: Message = {
           id: createId(),
@@ -216,11 +222,34 @@ export function useChatRoom() {
         void runHeartVoice(character, content, lastReply, hvConfig, setLatestHeartVoice)
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'AI 回复失败，请稍后重试')
+      if (err instanceof Error && err.name === 'AbortError') {
+        const partial = streamAccumRef.current.trim()
+        if (partial) {
+          const assistantMessage: Message = {
+            id: createId(),
+            characterId: character.id,
+            role: 'assistant',
+            content: partial,
+            timestamp: Date.now(),
+          }
+          await put('messages', assistantMessage)
+          dispatch({ type: 'chat/appendMessage', message: assistantMessage })
+        } else {
+          setError('⚠ 生成失败: The user aborted a request.')
+          window.setTimeout(() => setError(null), 3000)
+        }
+      } else {
+        setError(err instanceof Error ? err.message : 'AI 回复失败，请稍后重试')
+      }
     } finally {
       setStreamingText(null)
       sendingRef.current = false
+      abortControllerRef.current = null
     }
+  }
+
+  function stopGeneration() {
+    abortControllerRef.current?.abort()
   }
 
   return {
@@ -231,5 +260,6 @@ export function useChatRoom() {
     latestHeartVoice,
     send,
     sending: streamingText !== null,
+    stopGeneration,
   }
 }
