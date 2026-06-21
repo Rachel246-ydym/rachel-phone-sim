@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { useEffect, useRef, useState, type KeyboardEvent, useCallback } from 'react'
+import { useAppState } from '../../../store/AppContext'
 import ArchiveList from './ArchiveList'
 import ArchiveTab from './ArchiveTab'
 import BranchBar from './BranchBar'
@@ -21,12 +22,23 @@ type StoryTab = 'main' | 'if' | 'archive'
 type WriteMode = 'long' | 'short'
 const CHAPTER_SIZE = 5
 const LONG_PRESS_MS = 550
+const INPUT_MAX_HEIGHT = 260
+
+function formatTime(ts: number): string {
+  const d = new Date(ts)
+  const h = d.getHours()
+  const m = d.getMinutes()
+  const period = h < 12 ? '上午' : '下午'
+  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h
+  return `${period}${h12}:${String(m).padStart(2, '0')}`
+}
 
 interface UndoItem { message: Message; position: number }
 
 export default function StoryReader({
   character, mainStoryId, onMainStoryCreated, onBack,
 }: StoryReaderProps) {
+  const { userProfile } = useAppState()
   const { settings, saveSettings } = useStorySettings()
   const [activeTab, setActiveTab] = useState<StoryTab>('main')
   const [writeMode, setWriteMode] = useState<WriteMode>('long')
@@ -41,6 +53,16 @@ export default function StoryReader({
   const pressTimer = useRef<number | null>(null)
   const endRef = useRef<HTMLDivElement>(null)
   const titleSaveTimer = useRef<number | null>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
+
+  const autoResize = useCallback(() => {
+    const el = inputRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    const newH = Math.min(el.scrollHeight, INPUT_MAX_HEIGHT)
+    el.style.height = `${newH}px`
+    el.style.overflowY = el.scrollHeight > INPUT_MAX_HEIGHT ? 'auto' : 'hidden'
+  }, [])
 
   const activeStoryId =
     activeTab === 'if' && selectedIfLineId ? selectedIfLineId : mainStoryId
@@ -97,6 +119,10 @@ export default function StoryReader({
     if (storyHook.busy || !input.trim()) return
     void storyHook.send(input, writeMode)
     setInput('')
+    if (inputRef.current) {
+      inputRef.current.style.height = 'auto'
+      inputRef.current.style.overflowY = 'hidden'
+    }
   }
 
   function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
@@ -293,9 +319,20 @@ export default function StoryReader({
             // Long narrative view
             storyHook.messages.map((m) => {
               if (m.role === 'user') {
+                const isExpand = m.tag === 'expand'
                 return (
-                  <div key={m.id} className="story-reader__user">
-                    <p className="story-reader__user-text">{m.content}</p>
+                  <div key={m.id} className="story-reader__user-block">
+                    <div className="story-reader__user-header">
+                      <span className="story-reader__user-name">
+                        {userProfile?.nickname || userProfile?.name || '我'}
+                      </span>
+                      {isExpand && <span className="story-reader__expand-badge">扩写</span>}
+                      <span className="story-reader__seg-sep">|</span>
+                      <span className="story-reader__seg-time">{formatTime(m.timestamp)}</span>
+                    </div>
+                    <div className="story-reader__user-card">
+                      <p className="story-reader__user-text">{m.content}</p>
+                    </div>
                   </div>
                 )
               }
@@ -315,6 +352,18 @@ export default function StoryReader({
                     onPointerMove={cancelPress}
                     onPointerLeave={cancelPress}
                   >
+                    <div className="story-reader__seg-header">
+                      {character.avatar ? (
+                        <img className="story-reader__seg-avatar" src={character.avatar} alt="" />
+                      ) : (
+                        <span className="story-reader__seg-avatar story-reader__seg-avatar--fallback">
+                          {character.name.charAt(0)}
+                        </span>
+                      )}
+                      <span className="story-reader__seg-name">{character.name}</span>
+                      <span className="story-reader__seg-sep">|</span>
+                      <span className="story-reader__seg-time">{formatTime(m.timestamp)}</span>
+                    </div>
                     <div className="story-reader__segment-text">
                       {isRegen ? storyHook.streamingText || '正在重新生成…' : m.content}
                     </div>
@@ -353,6 +402,18 @@ export default function StoryReader({
           {storyHook.streamingText !== null && storyHook.regeneratingId === null && (
             writeMode === 'long' ? (
               <section className="story-reader__segment">
+                <div className="story-reader__seg-header">
+                  {character.avatar ? (
+                    <img className="story-reader__seg-avatar" src={character.avatar} alt="" />
+                  ) : (
+                    <span className="story-reader__seg-avatar story-reader__seg-avatar--fallback">
+                      {character.name.charAt(0)}
+                    </span>
+                  )}
+                  <span className="story-reader__seg-name">{character.name}</span>
+                  <span className="story-reader__seg-sep">|</span>
+                  <span className="story-reader__seg-time">{formatTime(Date.now())}</span>
+                </div>
                 <div className="story-reader__segment-text">{storyHook.streamingText || '正在生成…'}</div>
               </section>
             ) : (
@@ -372,11 +433,12 @@ export default function StoryReader({
       {isWritingVisible && (
         <div className="story-reader__input-bar">
           <textarea
+            ref={inputRef}
             className="story-reader__input"
             value={input}
             rows={1}
             placeholder="说什么或做什么…"
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => { setInput(e.target.value); autoResize() }}
             onKeyDown={handleKeyDown}
           />
           {writeMode === 'long' ? (

@@ -1039,8 +1039,12 @@
   padding: 9px 14px;
   outline: none;
   resize: none;
-  max-height: 96px;
+  min-height: 36px;
+  max-height: 260px;
   line-height: 1.4;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
 }
 
 .chat-room__input::placeholder {

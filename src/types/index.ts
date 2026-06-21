@@ -79,6 +79,7 @@ export interface Message {
   timestamp: number
   storyId?: string
   storyBranchId?: string
+  tag?: string
 }
 
 export interface StorySegment {

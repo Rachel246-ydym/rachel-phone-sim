@@ -161,7 +161,12 @@ export function useStoryReader(
     const limited = limitHistory(history, sett.contextLimit)
     const aiMessages: AiMessage[] = [
       { role: 'system', content: systemContent },
-      ...limited.map((m) => ({ role: m.role, content: m.content })),
+      ...limited.map((m) => ({
+        role: m.role,
+        content: m.tag === 'expand'
+          ? `请将以下情节梗概扩写为完整的叙事段落：\n${m.content}`
+          : m.content,
+      })),
     ]
     const params = character.modelParams
     return sett.streamOutput
@@ -256,27 +261,23 @@ export function useStoryReader(
     setError(null)
     try {
       const current = await ensureStory()
-      const expandMsg: AiMessage = {
+      const userExpandMessage: Message = {
+        id: createId(),
+        characterId: character.id,
         role: 'user',
-        content: `请将以下情节梗概扩写为完整的叙事段落：\n${content}`,
+        content,
+        tag: 'expand',
+        timestamp: Date.now(),
+        storyId: current.id,
+        storyBranchId: current.activeBranchId,
       }
-      if (!apiConfig) throw new Error('请先在「我的」→ API 设置中添加 API 配置')
-      const ln = settings.longNarrative
-      let memoryContext = ''
-      if (!isIfLine && ln.useCharMemory) {
-        memoryContext = await buildMemoryContext(character.id, character.modelParams.memoryCount ?? 20)
-      }
-      const systemContent = buildLongPrompt(character, settings, memoryContext)
-      const aiMessages: AiMessage[] = [
-        { role: 'system', content: systemContent },
-        ...limitHistory(messages, ln.contextLimit).map((m) => ({ role: m.role, content: m.content })),
-        expandMsg,
-      ]
+      await put('messages', userExpandMessage)
+      const history = [...messages, userExpandMessage]
+      setMessages(history)
       setStreamingText('')
-      const reply = ln.streamOutput
-        ? await chatCompletionStream(apiConfig, aiMessages, character.modelParams, (d) =>
-            setStreamingText((prev) => (prev ?? '') + d))
-        : await chatCompletion(apiConfig, aiMessages, character.modelParams)
+      const reply = await generate(history, 'long', (delta) =>
+        setStreamingText((prev) => (prev ?? '') + delta),
+      )
       const segment: Message = {
         id: createId(),
         characterId: character.id,
@@ -287,7 +288,7 @@ export function useStoryReader(
         storyBranchId: current.activeBranchId,
       }
       await put('messages', segment)
-      setMessages((prev) => [...prev, segment])
+      setMessages([...history, segment])
       await touchStory(current)
     } catch (err) {
       setError(err instanceof Error ? err.message : '扩写失败，请稍后重试')

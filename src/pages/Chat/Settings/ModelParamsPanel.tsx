@@ -89,7 +89,7 @@ export default function ModelParamsPanel({ params, onChange, showTitle = true, h
         <input
           type="range"
           className="chat-settings__slider"
-          min={0} max={1} step={0.05}
+          min={0.01} max={1} step={0.05}
           value={params.topP}
           onChange={(e) => set('topP', parseFloat(e.target.value))}
         />

@@ -1,4 +1,6 @@
-import { useState, type KeyboardEvent } from 'react'
+import { useCallback, useRef, useState, type KeyboardEvent } from 'react'
+
+const INPUT_MAX_HEIGHT = 260
 
 interface InputBarProps {
   disabled: boolean
@@ -7,11 +9,25 @@ interface InputBarProps {
 
 export default function InputBar({ disabled, onSend }: InputBarProps) {
   const [text, setText] = useState('')
+  const inputRef = useRef<HTMLTextAreaElement>(null)
+
+  const autoResize = useCallback(() => {
+    const el = inputRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    const newH = Math.min(el.scrollHeight, INPUT_MAX_HEIGHT)
+    el.style.height = `${newH}px`
+    el.style.overflowY = el.scrollHeight > INPUT_MAX_HEIGHT ? 'auto' : 'hidden'
+  }, [])
 
   function submit() {
     if (disabled || !text.trim()) return
     onSend(text)
     setText('')
+    if (inputRef.current) {
+      inputRef.current.style.height = 'auto'
+      inputRef.current.style.overflowY = 'hidden'
+    }
   }
 
   function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
@@ -31,11 +47,12 @@ export default function InputBar({ disabled, onSend }: InputBarProps) {
         </svg>
       </button>
       <textarea
+        ref={inputRef}
         className="chat-room__input"
         value={text}
         rows={1}
         placeholder="写点什么..."
-        onChange={(e) => setText(e.target.value)}
+        onChange={(e) => { setText(e.target.value); autoResize() }}
         onKeyDown={handleKeyDown}
       />
       <button

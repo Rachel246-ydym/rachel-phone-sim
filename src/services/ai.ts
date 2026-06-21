@@ -64,21 +64,34 @@ async function trackApiUsage(configId: string, tokens: number, success: boolean)
   }
 }
 
+function sanitizeApiParams(params: { temperature?: number; top_p?: number; max_tokens?: number }) {
+  return {
+    temperature: Math.max(0, Math.min(2, params.temperature ?? 0.85)),
+    top_p: Math.max(0.01, Math.min(1, params.top_p ?? 0.9)),
+    max_tokens: Math.max(1, Math.min(8192, params.max_tokens ?? 4096)),
+  }
+}
+
 function buildRequestBody(
   config: ApiConfig,
   messages: AiMessage[],
   params: ModelParams,
   stream: boolean,
 ): string {
+  const sanitized = sanitizeApiParams({
+    temperature: params.temperature,
+    top_p: params.topP,
+    max_tokens: params.maxTokens,
+  })
   // contextLimit 只截断对话历史，system prompt 必须始终保留
   const system = messages.filter((m) => m.role === 'system')
   const history = messages.filter((m) => m.role !== 'system')
   return JSON.stringify({
     model: config.model,
     messages: [...system, ...history.slice(-params.contextLimit)],
-    temperature: params.temperature,
-    top_p: params.topP,
-    max_tokens: params.maxTokens,
+    temperature: sanitized.temperature,
+    top_p: sanitized.top_p,
+    max_tokens: sanitized.max_tokens,
     stream,
   })
 }
