@@ -295,7 +295,8 @@
   right: 0;
   bottom: 0;
   width: 260px;
-  background: var(--color-surface, #1d1d22);
+  background: var(--bg-card);
+  border-radius: 26px 0 0 26px;
   z-index: 101;
   transform: translateX(100%);
   transition: transform 0.28s ease;
@@ -313,12 +314,14 @@
   align-items: center;
   justify-content: space-between;
   padding: 52px 16px 14px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-light);
+  flex-shrink: 0;
 }
 
 .menu-panel__title {
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 600;
+  color: var(--text-primary);
 }
 
 .menu-panel__close {
@@ -328,61 +331,76 @@
 }
 
 .menu-panel__section {
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border);
+  padding: 0 0 10px;
+  border-bottom: 1px solid var(--border-light);
 }
 
-.menu-panel__section-title {
-  margin: 0 0 10px;
-  padding: 0 16px;
-  font-size: 12px;
-  color: var(--text-secondary);
-  letter-spacing: 0.06em;
+.menu-panel__section:last-child {
+  border-bottom: none;
 }
 
-.menu-panel__item {
+.menu-panel__section-label {
+  margin: 0;
+  padding: 14px 16px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-light);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.menu-panel__row {
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
+  gap: 10px;
+  padding: 11px 14px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
   text-align: left;
-  font-size: 15px;
-  color: var(--text-primary);
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
 }
 
-.menu-panel__item:active {
+.menu-panel__row:active {
   background: var(--bg-input);
 }
 
-.menu-panel__icon {
-  font-size: 18px;
-  width: 24px;
-  text-align: center;
-}
-
-.menu-panel__arrow {
-  margin-left: auto;
-  color: var(--text-secondary);
-}
-
-.menu-panel__themes {
+.menu-panel__icon-box {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
   display: flex;
-  gap: 10px;
-  padding: 0 16px;
-  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-.menu-panel__swatch {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  border: 2px solid transparent;
-  transition: border-color 0.15s;
+.menu-panel__icon-box svg {
+  width: 16px;
+  height: 16px;
 }
 
-.menu-panel__swatch--active {
-  border-color: var(--text-primary);
+.menu-panel__row-title {
+  flex: 1;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-primary);
+  text-align: left;
+}
+
+.menu-panel__row-arrow {
+  font-size: 14px;
+  color: var(--text-light);
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.menu-panel__row-divider {
+  height: 1px;
+  background: var(--border-light);
+  margin: 0 14px;
 }
 
 /* ===== 角色信息面板（左侧滑入）===== */

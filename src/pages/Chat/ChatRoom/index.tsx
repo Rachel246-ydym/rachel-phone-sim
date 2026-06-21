@@ -138,9 +138,11 @@ export default function ChatRoom({ onOpenStory, onOpenMemory, onOpenCharProfile 
       />
       <MenuPanel
         open={menuOpen}
-        messages={messages}
-        characterName={character.name}
         onClose={() => setMenuOpen(false)}
+        onOpenCharProfile={() => {
+          setMenuOpen(false)
+          onOpenCharProfile()
+        }}
         onOpenMemory={() => {
           setMenuOpen(false)
           onOpenMemory()
