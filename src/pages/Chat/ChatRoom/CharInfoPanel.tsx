@@ -32,6 +32,7 @@ export default function CharInfoPanel({
   onOpenCharProfile,
   onOpenMemory,
   onSwitchCharacter,
+  onNewChar,
 }: CharInfoPanelProps) {
   const { characters, apiConfigs } = useAppState()
   const dispatch = useAppDispatch()
@@ -175,7 +176,7 @@ export default function CharInfoPanel({
           </div>
         </div>
 
-        {/* Footer — character switcher */}
+        {/* Footer — character switcher + new char + group */}
         <div className="cip__footer">
           <div className="cip__chars-row">
             {characters.map((c, idx) => {
@@ -193,16 +194,13 @@ export default function CharInfoPanel({
                 </button>
               )
             })}
-            <button className="cip__group-btn">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <circle cx="4.5" cy="4.5" r="2" stroke="currentColor" strokeWidth="1.5" />
-                <circle cx="9.5" cy="4.5" r="2" stroke="currentColor" strokeWidth="1.5" />
-                <path d="M1 12c0-1.8 1.6-3 3.5-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                <path d="M7 9c2 0 6 .9 6 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-              </svg>
-              <span>群聊</span>
-            </button>
           </div>
+          <button className="cip__new-char-btn" onClick={() => { onClose(); onNewChar() }}>
+            + 新建角色
+          </button>
+          <button className="cip__group-create-btn" disabled>
+            创建群组（即将推出）
+          </button>
         </div>
 
       </div>

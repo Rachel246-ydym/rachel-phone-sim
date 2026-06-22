@@ -6,7 +6,6 @@ import ChatTopBar from './ChatTopBar'
 import SearchOverlay from './SearchOverlay'
 import MenuPanel from './MenuPanel'
 import CharInfoPanel from './CharInfoPanel'
-import ContactsOverlay from './ContactsOverlay'
 import { useChatRoom } from './useChatRoom'
 import './ChatRoom.css'
 
@@ -14,9 +13,10 @@ interface ChatRoomProps {
   onOpenStory: () => void
   onOpenMemory: () => void
   onOpenCharProfile: () => void
+  onGoHome: () => void
 }
 
-export default function ChatRoom({ onOpenStory, onOpenMemory, onOpenCharProfile }: ChatRoomProps) {
+export default function ChatRoom({ onOpenStory, onOpenMemory, onOpenCharProfile, onGoHome }: ChatRoomProps) {
   const { characters, activeCharacterId } = useAppState()
   const dispatch = useAppDispatch()
   const { character, messages, streamingText, error, latestHeartVoice, send, sending, stopGeneration } =
@@ -25,7 +25,6 @@ export default function ChatRoom({ onOpenStory, onOpenMemory, onOpenCharProfile 
   const [searchOpen, setSearchOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [charInfoOpen, setCharInfoOpen] = useState(false)
-  const [contactsOpen, setContactsOpen] = useState(false)
   const [notifVisible, setNotifVisible] = useState(false)
   const notifTimer = useRef<number | null>(null)
 
@@ -41,15 +40,15 @@ export default function ChatRoom({ onOpenStory, onOpenMemory, onOpenCharProfile 
     }
   }, [latestHeartVoice, hvMode])
 
+  // Auto-select first character when no active character but characters exist
   useEffect(() => {
     if (!activeCharacterId && characters.length > 0) {
-      setContactsOpen(true)
+      dispatch({ type: 'chat/setActiveCharacter', characterId: characters[0].id })
     }
-  }, [activeCharacterId, characters.length])
+  }, [activeCharacterId, characters, dispatch])
 
   function switchCharacter(id: string) {
     dispatch({ type: 'chat/setActiveCharacter', characterId: id })
-    setContactsOpen(false)
   }
 
   if (!character) {
@@ -64,25 +63,12 @@ export default function ChatRoom({ onOpenStory, onOpenMemory, onOpenCharProfile 
               </button>
             </>
           ) : (
-            <>
-              <p>请选择联络人</p>
-              <button className="chat-page__empty-btn" onClick={() => setContactsOpen(true)}>
-                打开联络人
-              </button>
-            </>
+            <p>正在加载…</p>
           )}
+          <button className="chat-page__empty-btn chat-page__empty-btn--ghost" onClick={onGoHome}>
+            返回主页
+          </button>
         </div>
-        <ContactsOverlay
-          open={contactsOpen}
-          characters={characters}
-          activeCharacterId={activeCharacterId}
-          onClose={() => setContactsOpen(false)}
-          onSelect={switchCharacter}
-          onNewChar={() => {
-            setContactsOpen(false)
-            onOpenCharProfile()
-          }}
-        />
       </div>
     )
   }
@@ -91,7 +77,7 @@ export default function ChatRoom({ onOpenStory, onOpenMemory, onOpenCharProfile 
     <div className="chat-page">
       <ChatTopBar
         character={character}
-        onContactsOpen={() => setContactsOpen(true)}
+        onGoHome={onGoHome}
         onAvatarClick={() => setCharInfoOpen(true)}
         onStory={onOpenStory}
         onSearch={() => setSearchOpen((v) => !v)}
@@ -158,17 +144,6 @@ export default function ChatRoom({ onOpenStory, onOpenMemory, onOpenCharProfile 
         onOpenMemory={() => {
           setMenuOpen(false)
           onOpenMemory()
-        }}
-      />
-      <ContactsOverlay
-        open={contactsOpen}
-        characters={characters}
-        activeCharacterId={activeCharacterId}
-        onClose={() => setContactsOpen(false)}
-        onSelect={switchCharacter}
-        onNewChar={() => {
-          setContactsOpen(false)
-          onOpenCharProfile()
         }}
       />
       {hvMode === 'notification' && notifVisible && latestHeartVoice && (

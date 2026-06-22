@@ -9,9 +9,10 @@ export type ChatView = 'room' | 'story' | 'charProfile' | 'memoryCore'
 interface ChatModuleProps {
   initialView?: ChatView
   onViewChange?: (view: ChatView) => void
+  onGoHome?: () => void
 }
 
-export default function ChatModule({ initialView = 'room', onViewChange }: ChatModuleProps) {
+export default function ChatModule({ initialView = 'room', onViewChange, onGoHome }: ChatModuleProps) {
   const [view, setView] = useState<ChatView>(initialView)
 
   function changeView(next: ChatView) {
@@ -26,6 +27,7 @@ export default function ChatModule({ initialView = 'room', onViewChange }: ChatM
           onOpenStory={() => changeView('story')}
           onOpenMemory={() => changeView('memoryCore')}
           onOpenCharProfile={() => changeView('charProfile')}
+          onGoHome={onGoHome ?? (() => {})}
         />
       )
     case 'story':

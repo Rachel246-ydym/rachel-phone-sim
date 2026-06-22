@@ -19,7 +19,7 @@ import { get, getAll } from '../services/storage'
 import { applyTheme } from '../services/theme'
 import { applyThemeMode } from '../styles/theme'
 
-export type AppAction = ChatAction | ProfileAction
+export type AppAction = ChatAction | ProfileAction | { type: 'app/hydrated' }
 
 export interface AppState {
   characters: Character[]
@@ -29,6 +29,7 @@ export interface AppState {
   userProfile: UserProfile | null
   displaySettings: DisplaySettings
   featureApiAssignment: Record<string, string>
+  hydrated: boolean
 }
 
 const initialState: AppState = {
@@ -39,6 +40,7 @@ const initialState: AppState = {
   userProfile: null,
   displaySettings: { fullscreen: false, homePageMode: 'slide' },
   featureApiAssignment: {},
+  hydrated: false,
 }
 
 function reducer(state: AppState, action: AppAction): AppState {
@@ -86,6 +88,8 @@ function reducer(state: AppState, action: AppAction): AppState {
       return { ...state, displaySettings: action.settings }
     case 'profile/setFeatureApiAssignment':
       return { ...state, featureApiAssignment: action.assignment }
+    case 'app/hydrated':
+      return { ...state, hydrated: true }
   }
 }
 
@@ -125,6 +129,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (assignEntry?.value) {
         dispatch({ type: 'profile/setFeatureApiAssignment', assignment: assignEntry.value })
       }
+      dispatch({ type: 'app/hydrated' })
     }
     void hydrate()
     return () => {

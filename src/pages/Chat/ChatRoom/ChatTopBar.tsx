@@ -2,7 +2,7 @@ import type { Character } from '../../../types'
 
 interface ChatTopBarProps {
   character: Character
-  onContactsOpen: () => void
+  onGoHome: () => void
   onAvatarClick: () => void
   onStory: () => void
   onSearch: () => void
@@ -11,7 +11,7 @@ interface ChatTopBarProps {
 
 export default function ChatTopBar({
   character,
-  onContactsOpen,
+  onGoHome,
   onAvatarClick,
   onStory,
   onSearch,
@@ -20,7 +20,7 @@ export default function ChatTopBar({
   return (
     <header className="chat-topbar">
       <div className="chat-topbar__left">
-        <button className="chat-topbar__back" onClick={onContactsOpen} aria-label="联络人">
+        <button className="chat-topbar__back" onClick={onGoHome} aria-label="返回主页">
           <svg width="10" height="17" viewBox="0 0 10 17" fill="none">
             <path d="M8.5 1.5L1.5 8.5L8.5 15.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>

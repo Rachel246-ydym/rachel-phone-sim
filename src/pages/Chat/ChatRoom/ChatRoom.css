@@ -35,6 +35,12 @@
   font-size: 15px;
 }
 
+.chat-page__empty-btn--ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
 /* ===== 自定义顶栏 ===== */
 
 .chat-topbar {
@@ -672,175 +678,37 @@
   border-width: 2px;
 }
 
-.cip__group-btn {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 6px 14px;
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  flex-shrink: 0;
-  white-space: nowrap;
-}
-
-/* ===== 联络人浮层 ===== */
-
-.contacts-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 102;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-}
-
-.contacts-overlay__mask {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  animation: mask-fade-in 0.2s ease;
-}
-
-.contacts-overlay__sheet {
-  position: relative;
-  background: var(--bg-card);
-  border-radius: 20px 20px 0 0;
-  max-height: 75vh;
-  display: flex;
-  flex-direction: column;
-  animation: sheet-slide-up 0.28s ease;
-}
-
-@keyframes sheet-slide-up {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
-}
-
-.contacts-overlay__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 16px 14px;
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
-
-.contacts-overlay__title {
-  margin: 0;
-  font-size: 17px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.contacts-overlay__close {
-  font-size: 18px;
-  color: var(--text-secondary);
-  padding: 4px 8px;
-}
-
-.contacts-overlay__list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  overflow-y: auto;
-  flex: 1;
-}
-
-.contacts-overlay__empty {
-  text-align: center;
-  padding: 32px 16px;
-  color: var(--text-secondary);
-  font-size: 14px;
-}
-
-.contacts-overlay__item {
+.cip__new-char-btn {
   width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  text-align: left;
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  color: var(--color-primary);
+  font-size: 14px;
+  text-align: center;
+  background: transparent;
+  cursor: pointer;
 }
 
-.contacts-overlay__item--active {
+.cip__new-char-btn:active {
   background: var(--color-primary-bg);
 }
 
-.contacts-overlay__item:active {
-  background: var(--bg-input);
-}
-
-.contacts-overlay__avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: var(--color-primary-light);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: Georgia, 'Palatino Linotype', serif;
-  font-size: 18px;
-  color: var(--color-primary);
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.contacts-overlay__avatar img {
+.cip__group-create-btn {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.contacts-overlay__info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-}
-
-.contacts-overlay__name {
-  font-size: 16px;
-  color: var(--text-primary);
-}
-
-.contacts-overlay__online {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--color-sage);
-}
-
-.contacts-overlay__footer {
-  padding: 12px 16px;
-  border-top: 1px solid var(--border);
-  display: flex;
-  gap: 10px;
-  flex-shrink: 0;
-}
-
-.contacts-overlay__add {
-  flex: 1;
-  padding: 11px;
-  border-radius: 10px;
-  background: var(--color-primary);
-  color: #fff;
-  font-size: 15px;
-}
-
-.contacts-overlay__group {
-  flex: 1;
-  padding: 11px;
-  border-radius: 10px;
-  background: var(--bg-input);
-  color: var(--text-secondary);
+  margin-top: 8px;
+  padding: 10px;
+  border-radius: 14px;
+  color: var(--text-light);
   font-size: 13px;
+  text-align: center;
+  background: transparent;
+  border: none;
   cursor: not-allowed;
-  opacity: 0.7;
+  opacity: 0.6;
 }
+
 
 /* ===== 消息区域 ===== */
 
@@ -1012,6 +880,7 @@
   align-items: flex-end;
   gap: 8px;
   padding: 8px 12px;
+  padding-bottom: calc(8px + env(safe-area-inset-bottom));
   border-top: 1px solid var(--border);
   background: var(--glass-bg);
   backdrop-filter: blur(14px);
