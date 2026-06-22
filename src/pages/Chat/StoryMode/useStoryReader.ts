@@ -7,23 +7,24 @@ import { CHAT_SYSTEM_PROMPT, NARRATIVE_SYSTEM_PROMPT } from '../../../constants/
 import type { Archive, Character, Message, Story, StoryBranch } from '../../../types'
 import type { StorySettingsData } from './useStorySettings'
 
-const PERSON_LABEL: Record<string, string> = {
-  first: '第一人称',
-  third: '第三人称',
-  mixed: '混合视角',
-}
-
 function buildLongPrompt(character: Character, settings: StorySettingsData, memoryContext: string): string {
   const ln = settings.longNarrative
+  const name = character.name
+  const personPromptMap: Record<string, string> = {
+    first: `请以角色${name}的第一人称视角（"我"）进行叙事。"我"就是${name}，用"我"来描述角色的行动、感受和思考。`,
+    third: `请以第三人称视角进行叙事，使用"${name}"或"他/她"来指代角色。`,
+    mixed: `可以在第一人称和第三人称之间灵活切换。角色的内心活动和感受用第一人称（"我"），外部叙事和场景描写用第三人称（"${name}"）。`,
+  }
+  const personPrompt = personPromptMap[ln.narrativePerson] ?? personPromptMap.third
   return [
     NARRATIVE_SYSTEM_PROMPT,
     '【角色设定】',
-    `你正在创作「${character.name}」与用户共同经历的线下剧情。`,
+    `你正在创作「${name}」与用户共同经历的线下剧情。`,
     character.nickname ? `故事中的用户即「${character.nickname}」。` : '',
     character.persona,
     character.speakingStyle ? `【说话风格】\n${character.speakingStyle}` : '',
     '【剧情设定】',
-    `叙事人称：${PERSON_LABEL[ln.narrativePerson] ?? '第三人称'}`,
+    personPrompt,
     ln.styleGuide ? `文风：${ln.styleGuide}` : '',
     `目标字数：约${ln.targetWords}字`,
     memoryContext,
@@ -149,6 +150,7 @@ export function useStoryReader(
     history: Message[],
     mode: 'long' | 'short',
     onDelta: (delta: string) => void,
+    instruction?: string,
   ): Promise<string> {
     if (!apiConfig) throw new Error('请先在「我的」→ API 设置中添加 API 配置')
     const isShort = mode === 'short'
@@ -166,9 +168,10 @@ export function useStoryReader(
       ...limited.map((m) => ({
         role: m.role,
         content: m.tag === 'expand'
-          ? `请将以下情节梗概扩写为完整的叙事段落：\n${m.content}`
+          ? `用户输入的内容作为梗概，不要原样输出，而是将其扩充为完整的叙事段落。保持角色设定和文风一致。\n梗概内容：${m.content}`
           : m.content,
       })),
+      ...(instruction ? [{ role: 'user' as const, content: instruction }] : []),
     ]
     const params = character.modelParams
 
@@ -280,8 +283,10 @@ export function useStoryReader(
     try {
       current = await ensureStory()
       setStreamingText('')
-      const reply = await generate(messages, mode, (delta) =>
-        setStreamingText((prev) => (prev ?? '') + delta),
+      const reply = await generate(
+        messages, mode,
+        (delta) => setStreamingText((prev) => (prev ?? '') + delta),
+        '请根据上文继续创作下一段内容。',
       )
       const segment: Message = {
         id: createId(),

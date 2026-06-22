@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import SubPage from '../../../components/SubPage'
-import type { NarrativePerson, StoryTheme } from '../../../types'
+import type { NarrativePerson } from '../../../types'
 import type { StorySettingsData, LongNarrativeSettings, ShortRPSettings } from './useStorySettings'
 import { THEME_VARS } from './useStorySettings'
+import NumberStepper from './NumberStepper'
 
 interface StorySettingsProps {
   initial: StorySettingsData
@@ -10,12 +11,11 @@ interface StorySettingsProps {
   onSave: (data: StorySettingsData) => Promise<void>
 }
 
-const THEMES: { value: StoryTheme; label: string; bg: string; fg: string }[] = [
-  { value: 'dark', label: '暗黑', bg: '#121214', fg: '#f0f0f2' },
-  { value: 'light', label: '白底', bg: '#ffffff', fg: '#1a1a1e' },
-  { value: 'cream', label: '米白', bg: '#f5f0e8', fg: '#2a2a1e' },
-  { value: 'navy', label: '深蓝', bg: '#0d1b2a', fg: '#d6e4f0' },
-]
+const STYLE_EXAMPLE = `写实细腻，注重感官细节。环境描写沉浸，情绪含蓄不直白。对话自然贴近日常口语，避免书面化。节奏舒缓，留白充分。`
+
+const CUSTOM_PROMPT_EXAMPLE = `1. 扩写剧情时不要出现括号和你的思考过程，直接输出正文。
+2. 角色对话不超过三句，多用动作和神态代替语言。
+3. 禁止替用户角色说话或做决定。`
 
 const PERSONS: { value: NarrativePerson; label: string }[] = [
   { value: 'first', label: '第一人称' },
@@ -72,22 +72,6 @@ export default function StorySettings({ initial, onBack, onSave }: StorySettings
         {settingsTab === 'long' && (
           <>
             <section className="story-settings__section">
-              <h2 className="story-settings__section-title">外观主题</h2>
-              <div className="story-settings__theme-row">
-                {THEMES.map((t) => (
-                  <button
-                    key={t.value}
-                    className={`story-settings__theme-chip${longForm.theme === t.value ? ' story-settings__theme-chip--active' : ''}`}
-                    style={{ background: t.bg, color: t.fg }}
-                    onClick={() => setLong('theme', t.value)}
-                  >
-                    {t.label}
-                  </button>
-                ))}
-              </div>
-            </section>
-
-            <section className="story-settings__section">
               <div className="story-settings__row">
                 <span className="story-settings__label">默认加入角色记忆</span>
                 <button
@@ -128,6 +112,7 @@ export default function StorySettings({ initial, onBack, onSave }: StorySettings
 
             <section className="story-settings__section">
               <h2 className="story-settings__section-title">文风描述</h2>
+              <p className="story-settings__section-desc">描述你希望的叙事风格和文字质感</p>
               <textarea
                 className="story-settings__textarea"
                 rows={4}
@@ -135,43 +120,58 @@ export default function StorySettings({ initial, onBack, onSave }: StorySettings
                 value={longForm.styleGuide}
                 onChange={(e) => setLong('styleGuide', e.target.value)}
               />
+              {!longForm.styleGuide && (
+                <button
+                  className="story-settings__example-link"
+                  onClick={() => setLong('styleGuide', STYLE_EXAMPLE)}
+                >
+                  📝 查看示例
+                </button>
+              )}
             </section>
 
             <section className="story-settings__section">
               <div className="story-settings__row">
-                <label className="story-settings__label" htmlFor="ss-target-words">目标字数</label>
-                <input
-                  id="ss-target-words" className="story-settings__number" type="number"
-                  min={500} max={3000} step={100} value={longForm.targetWords}
-                  onChange={(e) => setLong('targetWords', Number(e.target.value))}
+                <label className="story-settings__label">目标字数</label>
+                <NumberStepper
+                  value={longForm.targetWords}
+                  min={100}
+                  max={3000}
+                  step={100}
+                  onChange={(v) => setLong('targetWords', v)}
                 />
               </div>
             </section>
 
             <section className="story-settings__section">
               <div className="story-settings__row">
-                <label className="story-settings__label" htmlFor="ss-context-long">上下文读取上限（段）</label>
-                <input
-                  id="ss-context-long" className="story-settings__number" type="number"
-                  min={1} max={30} step={1} value={longForm.contextLimit}
-                  onChange={(e) => setLong('contextLimit', Number(e.target.value))}
+                <label className="story-settings__label">上下文读取上限（段）</label>
+                <NumberStepper
+                  value={longForm.contextLimit}
+                  min={1}
+                  max={30}
+                  step={1}
+                  onChange={(v) => setLong('contextLimit', v)}
                 />
               </div>
             </section>
 
             <section className="story-settings__section">
               <div className="story-settings__row">
-                <label className="story-settings__label" htmlFor="ss-auto-summary">每几条自动总结</label>
-                <input
-                  id="ss-auto-summary" className="story-settings__number" type="number"
-                  min={1} max={20} step={1} value={longForm.autoSummaryEvery}
-                  onChange={(e) => setLong('autoSummaryEvery', Number(e.target.value))}
+                <label className="story-settings__label">每几条自动总结</label>
+                <NumberStepper
+                  value={longForm.autoSummaryEvery}
+                  min={3}
+                  max={20}
+                  step={1}
+                  onChange={(v) => setLong('autoSummaryEvery', v)}
                 />
               </div>
             </section>
 
             <section className="story-settings__section">
               <h2 className="story-settings__section-title">自定义指令（可选）</h2>
+              <p className="story-settings__section-desc">添加额外的创作规则或限制</p>
               <textarea
                 className="story-settings__textarea"
                 rows={3}
@@ -179,6 +179,14 @@ export default function StorySettings({ initial, onBack, onSave }: StorySettings
                 value={longForm.customPrompt ?? ''}
                 onChange={(e) => setLong('customPrompt', e.target.value)}
               />
+              {!longForm.customPrompt && (
+                <button
+                  className="story-settings__example-link"
+                  onClick={() => setLong('customPrompt', CUSTOM_PROMPT_EXAMPLE)}
+                >
+                  📝 查看示例
+                </button>
+              )}
             </section>
           </>
         )}
@@ -211,28 +219,33 @@ export default function StorySettings({ initial, onBack, onSave }: StorySettings
 
             <section className="story-settings__section">
               <div className="story-settings__row">
-                <label className="story-settings__label" htmlFor="ss-reply-limit">回复字数上限</label>
-                <input
-                  id="ss-reply-limit" className="story-settings__number" type="number"
-                  min={30} max={200} step={10} value={shortForm.replyWordLimit}
-                  onChange={(e) => setShort('replyWordLimit', Number(e.target.value))}
+                <label className="story-settings__label">回复字数上限</label>
+                <NumberStepper
+                  value={shortForm.replyWordLimit}
+                  min={30}
+                  max={200}
+                  step={10}
+                  onChange={(v) => setShort('replyWordLimit', v)}
                 />
               </div>
             </section>
 
             <section className="story-settings__section">
               <div className="story-settings__row">
-                <label className="story-settings__label" htmlFor="ss-context-short">上下文读取上限（条）</label>
-                <input
-                  id="ss-context-short" className="story-settings__number" type="number"
-                  min={1} max={30} step={1} value={shortForm.contextLimit}
-                  onChange={(e) => setShort('contextLimit', Number(e.target.value))}
+                <label className="story-settings__label">上下文读取上限（条）</label>
+                <NumberStepper
+                  value={shortForm.contextLimit}
+                  min={1}
+                  max={30}
+                  step={1}
+                  onChange={(v) => setShort('contextLimit', v)}
                 />
               </div>
             </section>
 
             <section className="story-settings__section">
               <h2 className="story-settings__section-title">自定义指令（可选）</h2>
+              <p className="story-settings__section-desc">添加额外的创作规则或限制</p>
               <textarea
                 className="story-settings__textarea"
                 rows={3}
@@ -240,6 +253,14 @@ export default function StorySettings({ initial, onBack, onSave }: StorySettings
                 value={shortForm.customPrompt ?? ''}
                 onChange={(e) => setShort('customPrompt', e.target.value)}
               />
+              {!shortForm.customPrompt && (
+                <button
+                  className="story-settings__example-link"
+                  onClick={() => setShort('customPrompt', CUSTOM_PROMPT_EXAMPLE)}
+                >
+                  📝 查看示例
+                </button>
+              )}
             </section>
           </>
         )}

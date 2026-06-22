@@ -3,6 +3,7 @@ import { useAppState } from '../../../store/AppContext'
 import ArchiveList from './ArchiveList'
 import ArchiveTab from './ArchiveTab'
 import BranchBar from './BranchBar'
+import EditModal from './EditModal'
 import IfLineTab from './IfLineTab'
 import SegmentActions from './SegmentActions'
 import StorySettings from './StorySettings'
@@ -43,6 +44,7 @@ export default function StoryReader({
   const [showArchiveList, setShowArchiveList] = useState(false)
   const [input, setInput] = useState('')
   const [menuTarget, setMenuTarget] = useState<Message | null>(null)
+  const [editingSegment, setEditingSegment] = useState<Message | null>(null)
   const [undoStack, setUndoStack] = useState<UndoItem[]>([])
   const [editingTitle, setEditingTitle] = useState(false)
   const [titleValue, setTitleValue] = useState('')
@@ -317,7 +319,15 @@ export default function StoryReader({
               if (m.role === 'user') {
                 const isExpand = m.tag === 'expand'
                 return (
-                  <div key={m.id} className="story-reader__user-block">
+                  <div
+                    key={m.id}
+                    className="story-reader__user-block"
+                    onDoubleClick={() => !storyHook.busy && setMenuTarget(m)}
+                    onPointerDown={() => !storyHook.busy && startPress(m)}
+                    onPointerUp={cancelPress}
+                    onPointerMove={cancelPress}
+                    onPointerLeave={cancelPress}
+                  >
                     <div className="story-reader__user-header">
                       <span className="story-reader__user-name">
                         {userProfile?.nickname || userProfile?.name || '我'}
@@ -521,17 +531,32 @@ export default function StoryReader({
       {/* Segment actions menu */}
       {menuTarget && (
         <SegmentActions
-          segment={menuTarget}
+          segmentRole={menuTarget.role === 'user' ? 'user' : 'assistant'}
           isPinned={(storyHook.story?.pinnedParagraphIds ?? []).includes(menuTarget.id)}
           onClose={() => setMenuTarget(null)}
-          onRegenerate={() => { setMenuTarget(null); void storyHook.regenerate(menuTarget.id, writeMode) }}
-          onSaveEdit={(content) => { setMenuTarget(null); void storyHook.editSegment(menuTarget.id, content) }}
+          onRegenerate={menuTarget.role === 'assistant'
+            ? () => { setMenuTarget(null); void storyHook.regenerate(menuTarget.id, writeMode) }
+            : undefined}
+          onEditClick={() => { setEditingSegment(menuTarget); setMenuTarget(null) }}
           onDelete={() => { const t = menuTarget; setMenuTarget(null); handleDeleteWithUndo(t.id) }}
-          onCreateIfLine={(title) => {
-            const t = menuTarget; setMenuTarget(null)
-            void handleCreateIfLine(t.id, title)
+          onCreateIfLine={menuTarget.role === 'assistant'
+            ? (title) => { const t = menuTarget; setMenuTarget(null); void handleCreateIfLine(t.id, title) }
+            : undefined}
+          onTogglePin={menuTarget.role === 'assistant'
+            ? () => void storyHook.togglePinParagraph(menuTarget.id)
+            : undefined}
+        />
+      )}
+
+      {/* Edit modal (shared for user and AI segments) */}
+      {editingSegment && (
+        <EditModal
+          initialContent={editingSegment.content}
+          onClose={() => setEditingSegment(null)}
+          onSave={(content) => {
+            void storyHook.editSegment(editingSegment.id, content)
+            setEditingSegment(null)
           }}
-          onTogglePin={() => void storyHook.togglePinParagraph(menuTarget.id)}
         />
       )}
     </div>

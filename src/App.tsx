@@ -49,7 +49,7 @@ export default function App() {
 
   return (
     <div className="phone">
-      <StatusBar />
+      {!hideChrome && <StatusBar />}
       <main className="phone__screen">
         {tab === 'home' && <HomeModule onOpenChat={openChat} />}
         {tab === 'chat' && (
