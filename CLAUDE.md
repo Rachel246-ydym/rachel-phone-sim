@@ -4,6 +4,8 @@
 
 AI 角色陪伴手机模拟器 PWA。用户在模拟手机界面中与 AI 角色聊天、阅读/创作剧情、管理角色记忆。
 
+> 注意：本文档主要记录目标设计、开发约定和历史规划，不完全代表当前源码真实进度。接手或开发前请先查看 `README.md` 与 `docs/current-status.md`，并以当前仓库代码为准。
+
 ## 技术栈
 
 * React 19 + TypeScript + Vite
@@ -23,16 +25,17 @@ AI 角色陪伴手机模拟器 PWA。用户在模拟手机界面中与 AI 角色
 ```
 src/
 ├── components/     # 页面组件和 UI 组件
-├── contexts/       # React Context + useReducer 全局状态
+├── store/          # React Context + useReducer 全局状态
+├── pages/          # 主页、聊天、故事、我的等页面模块
 ├── services/       # IndexedDB 存储服务、API 调用
-├── types/          # TypeScript 类型定义（10 个 Store）
+├── types/          # TypeScript 类型定义
 ├── hooks/          # 自定义 hooks（useAutoScheduler 等）
 ├── styles/         # 全局样式和主题变量
 ├── App.tsx         # 根组件，路由和导航
 └── main.tsx        # 入口
 ```
 
-## 已完成功能模块
+## 目标/规划功能模块（待以源码核实）
 
 1. 角色档案 CRUD（头像、名称、昵称、人设）
 2. 聊天室（消息气泡、DeepSeek 流式输出、多条回复）
@@ -45,6 +48,8 @@ src/
 9. 主题系统（6 个预设主题，CSS 变量注入）
 10. 主屏幕（日历小组件、角色照片、App 图标网格）
 11. 聊天室 UI（顶栏、侧滑面板、联络人浮层、搜索栏）
+
+当前源码已实现其中一部分，但也存在未接入页面、占位入口、残留组件和半成品功能。真实进度以 `docs/current-status.md` 为准。
 
 ## 当前 UI 重构任务
 

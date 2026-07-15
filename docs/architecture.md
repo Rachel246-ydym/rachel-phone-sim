@@ -1,6 +1,7 @@
 # 功能规格书 — Rachel Phone Simulator
 
 > 完整功能需求文档。Claude Code 不自动读取此文件，需要时用 `@docs/architecture.md` 引用。
+> 本文档是目标蓝图和规格说明，不代表当前代码已全部实现。当前真实进度请查看 `README.md` 与 `docs/current-status.md`，并以源码为准。
 
 ---
 
