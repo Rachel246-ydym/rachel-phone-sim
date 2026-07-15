@@ -5,7 +5,7 @@
 .chat-settings__missing {
   margin: 32px 16px;
   text-align: center;
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
 }
 
 .chat-settings__section {
@@ -27,7 +27,7 @@
   justify-content: space-between;
   padding: 10px 16px;
   gap: 12px;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .chat-settings__row:last-child {
@@ -48,13 +48,13 @@
 
 .chat-settings__label {
   font-size: 14px;
-  color: var(--color-text);
+  color: var(--text-primary);
   flex-shrink: 0;
 }
 
 .chat-settings__value {
   font-size: 13px;
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
 }
 
 .chat-settings__slider {
@@ -67,9 +67,9 @@
   width: 72px;
   font: inherit;
   font-size: 14px;
-  color: var(--color-text);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  color: var(--text-primary);
+  background: var(--bg-input);
+  border: 1px solid var(--border);
   border-radius: 6px;
   padding: 4px 8px;
   text-align: right;
@@ -84,9 +84,9 @@
   flex: 1;
   font: inherit;
   font-size: 13px;
-  color: var(--color-text);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  color: var(--text-primary);
+  background: var(--bg-input);
+  border: 1px solid var(--border);
   border-radius: 6px;
   padding: 5px 8px;
   outline: none;
@@ -115,8 +115,8 @@
 .chat-settings__toggle-track {
   position: absolute;
   inset: 0;
-  background: var(--color-border);
-  border-radius: 12px;
+  background: var(--border);
+  border-radius: var(--radius-md);
   transition: background 0.2s;
   cursor: pointer;
 }
@@ -127,7 +127,7 @@
   left: 3px;
   width: 18px;
   height: 18px;
-  background: #fff;
+  background: var(--text-on-primary);
   border-radius: 50%;
   transition: transform 0.2s;
   pointer-events: none;
@@ -151,9 +151,9 @@
 .chat-settings__radio-btn {
   font-size: 12px;
   padding: 4px 10px;
-  border-radius: 12px;
-  border: 1px solid var(--color-border);
-  color: var(--color-text-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -161,13 +161,13 @@
 .chat-settings__radio-btn--active {
   border-color: var(--color-primary);
   color: var(--color-primary);
-  background: rgba(76, 175, 125, 0.1);
+  background: var(--color-primary-bg);
 }
 
 /* Sub-setting (indented, shown when parent is enabled) */
 .chat-settings__sub {
-  background: var(--color-surface);
-  border-radius: 8px;
+  background: var(--bg-input);
+  border-radius: var(--radius-sm);
   margin: 0 16px 8px;
   overflow: hidden;
 }
@@ -185,9 +185,9 @@
   display: block;
   width: 100%;
   padding: 13px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--color-primary);
-  color: #fff;
+  color: var(--text-on-primary);
   font-size: 15px;
   font-weight: 500;
   text-align: center;
